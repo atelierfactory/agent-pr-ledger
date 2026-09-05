@@ -15,6 +15,7 @@ from collections import Counter
 from datetime import datetime
 
 DEFINITION_VERSION = "1.0"
+TOOL_VERSION = "0.1.0"
 API = "https://api.github.com"
 
 BOT_AUTHORS = {
@@ -64,7 +65,7 @@ def classify(pr: dict) -> tuple[str | None, str]:
 
 
 class _NoRedirect(urllib.request.HTTPRedirectHandler):
-    """Authorization ヘッダが別ホストへ転送されないよう、リダイレクトを追わない。"""
+    """Never follow redirects, so the Authorization header cannot be forwarded to another host."""
     def redirect_request(self, req, fp, code, msg, headers, newurl):
         if urllib.parse.urlparse(newurl).netloc != "api.github.com":
             return None
@@ -91,15 +92,13 @@ class GitHub:
         })
         for attempt in range(3):
             try:
-                with urllib.request.urlopen(self._opener(), req, timeout=30) as r:
-                    if urllib.parse.urlparse(r.geturl()).netloc != "api.github.com":
-                        raise RuntimeError("refusing redirect off api.github.com")
+                with self._opener()(req, timeout=30) as r:   # redirects are refused before they are followed
                     self.calls += 1
                     return json.loads(r.read().decode())
             except urllib.error.HTTPError as e:
                 remaining = e.headers.get("X-RateLimit-Remaining")
                 if e.code == 403 and remaining not in (None, "0"):
-                    raise                      # レート制限ではなく認可の問題
+                    raise                      # an authorisation problem, not a rate limit
                 if e.code in (403, 429) and attempt < 2:
                     wait = e.headers.get("Retry-After")
                     time.sleep(float(wait) if wait else 2 ** attempt)
@@ -170,7 +169,7 @@ def build(repo: str, limit: int = 100, token: str | None = None) -> dict:
                                       gh.review_comments(repo, n)),
         })
     d = sorted(all_dates)
-    # 8: detection は常に全キーを 0 で埋める
+    # always emit all five detection keys, zero-filled
     cov = {k: coverage.get(k, 0) for k in ("author", "branch", "body", "trace", "none")}
     return {"repo": repo, "definition_version": DEFINITION_VERSION,
             "rows": rows, "coverage": cov, "api_calls": gh.calls,
@@ -186,7 +185,8 @@ TEXT = {
         warn="{p}% of merged agent PRs have no review record.",
         allrec="All {n} merged agent PRs have a review record.",
         note1="This is a count, not a judgement — definition v{v}",
-        note2="Comparison with other repositories is not shown in v0.",
+        note2="Comparison with other repositories is shown only if you opt in to sending your counts.",
+        note2_sent="Your counts were sent; the position above is the response.",
         caveat=['"No review record" does not mean nobody looked. If the diff was reviewed',
                 "inside the agent's own interface, that review leaves no record on GitHub.",
                 "This counts whether a review record exists — not whether a review happened."],
@@ -210,7 +210,8 @@ TEXT = {
         warn="マージされたPRのうち、審査の記録がないものが {p}% あります。",
         allrec="マージされた{n}件は、すべて審査の記録があります。",
         note1="数え方の記述です。良し悪しの判定はしません → 定義 v{v}",
-        note2="他のリポジトリとの比較は v0 では出しません。",
+        note2="他のリポジトリとの比較は、集計値の送信に同意した場合のみ返ります。",
+        note2_sent="集計値を送信し、上の位置がその応答です。",
         caveat=["「記録がない」は「誰も見ていない」ではありません。エージェントの画面の中で",
                 "確認してからマージした場合、その審査はGitHub上に記録として残りません。",
                 "数えているのは「審査の記録が残っているか」であって、審査が行われたかではありません。"],
@@ -228,7 +229,7 @@ TEXT = {
 
 
 def monthly(led: dict) -> list[tuple[str, int, int, int]]:
-    """(月, 件数, 記録あり, 記録なし) を古い順に返す。"""
+    """Return (month, total, with_record, without_record), oldest first."""
     out = {}
     for r in led["rows"]:
         k = r["created_at"][:7]
@@ -237,7 +238,8 @@ def monthly(led: dict) -> list[tuple[str, int, int, int]]:
     return [(k, *v) for k, v in sorted(out.items())]
 
 
-def render(led: dict, month: str | None = None, lang: str = "en") -> str:
+def render(led: dict, month: str | None = None, lang: str = "en",
+           position: list[str] | None = None) -> str:
     T = TEXT.get(lang, TEXT["en"])
     rows = [r for r in led["rows"] if not month or r["created_at"][:7] == month]
     if not rows:
@@ -246,8 +248,10 @@ def render(led: dict, month: str | None = None, lang: str = "en") -> str:
     rec, unrec, nm, n = c["recorded"], c["unrecorded"], c["not_merged"], len(rows)
     merged = rec + unrec
     pc = lambda x: f"{x/n*100:.0f}%"
-    types = Counter(r["identity_type"] for r in rows)
-    tkey = types.most_common(1)[0][0] if len(types) == 1 else "unknown"
+    from submit import dominant_type
+    tkey, tshare = dominant_type(rows)
+    if tkey not in ("bot", "self"):
+        tkey = "unknown"
     span = led.get("span")
     win = (T["window"].format(k=led.get("scanned_prs", "?"),
                               a=span[0] if span else "?", b=span[1] if span else "?")
@@ -261,9 +265,16 @@ def render(led: dict, month: str | None = None, lang: str = "en") -> str:
         L += [f"  {T['warn'].format(p=f'{unrec/merged*100:.0f}')}", ""]
     elif merged:
         L += [f"  {T['allrec'].format(n=merged)}", ""]
-    L += [f"  ({T['note1'].format(v=led['definition_version'])})", f"  {T['note2']}", ""]
+    # Position always comes after the unrecorded-share line, so that a rank can never read as absolution.
+    if position:
+        L += position + [""]
+    L += [f"  ({T['note1'].format(v=led['definition_version'])})",
+          f"  {T['note2'] if not position else T['note2_sent']}", ""]
     L += ["  " + x for x in T["caveat"]] + [""]
-    L += [f"  {T['cls']}: {T['types'][tkey]}", f"  {T['breakdown']}"]
+    sep, ob, cb = ("・", "（", "）") if lang == "ja" else (", ", " (", ")")
+    basis = sep.join(f"{k} {v*100:.0f}%" for k, v in sorted(tshare.items(), key=lambda x: -x[1]))
+    L += [f"  {T['cls']}: {T['types'][tkey]}" + (f"{ob}{basis}{cb}" if basis else ""),
+          f"  {T['breakdown']}"]
     for a, k in Counter(r["agent"] for r in rows).most_common():
         sm = [r for r in rows if r["agent"] == a and r["outcome"] != "not_merged"]
         u = sum(1 for r in sm if r["outcome"] == "unrecorded")
@@ -287,17 +298,82 @@ def render(led: dict, month: str | None = None, lang: str = "en") -> str:
 
 def main(argv):
     if len(argv) < 2:
-        print("usage: ledger.py OWNER/REPO [limit] [--lang en|ja] [--month YYYY-MM]", file=sys.stderr)
+        print("usage: ledger.py OWNER/REPO [limit] [--lang en|ja] [--month YYYY-MM] "
+              "[--json] [--dry-run|--preview|--send] [--link]", file=sys.stderr)
         return 2
+    KNOWN = {"--lang", "--month", "--json", "--dry-run", "--preview", "--send", "--link"}
+    VALUED = {"--lang", "--month"}
+    i, seen_limit = 2, False
+    while i < len(argv):
+        a = argv[i]
+        if a.startswith("--"):
+            if a not in KNOWN:
+                print(f"error: unknown option {a}", file=sys.stderr); return 2
+            i += 2 if a in VALUED else 1
+            continue
+        if seen_limit or i != 2:
+            print(f"error: unexpected argument {a!r} "
+                  "(the limit must come immediately after the repository)", file=sys.stderr)
+            return 2
+        seen_limit = True
+        i += 1
     limit = 100
     if len(argv) > 2 and not argv[2].startswith("--"):
         if not argv[2].isdigit() or int(argv[2]) < 1:
             print(f"error: limit must be a positive integer, got {argv[2]!r}", file=sys.stderr)
             return 2
         limit = int(argv[2])
-    lang = argv[argv.index("--lang") + 1] if "--lang" in argv else "en"
-    month = argv[argv.index("--month") + 1] if "--month" in argv else None
+    def opt(name, default=None):
+        if name not in argv:
+            return default
+        i = argv.index(name) + 1
+        if i >= len(argv) or argv[i].startswith("--"):
+            print(f"error: {name} needs a value", file=sys.stderr)
+            raise SystemExit(2)
+        return argv[i]
+    lang = opt("--lang", "en")
+    if lang not in TEXT:
+        print(f"error: --lang must be one of {sorted(TEXT)}", file=sys.stderr)
+        return 2
+    month = opt("--month")
+    if month and not re.fullmatch(r"[0-9]{4}-(0[1-9]|1[0-2])", month):
+        print("error: --month must be YYYY-MM", file=sys.stderr)
+        return 2
+    # check exclusivity before touching the network
+    modes = [f for f in ("--dry-run", "--preview", "--send") if f in argv]
+    if len(modes) > 1:
+        print(f"error: {' and '.join(modes)} are mutually exclusive", file=sys.stderr)
+        return 2
     led = build(argv[1], limit)
+    position, context_obj, ctx_status = None, None, "not_opted_in"
+    if modes:
+        from submit import (build_payload, oidc_token, send, dry_run_text, position_text,
+                            fetch_cohorts, pick_cohort, preview_from_cohort, dry_run_note)
+        payload = build_payload(led, TOOL_VERSION, link="--link" in argv)
+        if modes[0] != "--send":
+            # The default dry run is fully offline: not one byte leaves the runner.
+            print(dry_run_text(payload, preview="--preview" in argv))
+            if modes[0] == "--preview":
+                # Only here do we make one outbound GET: a public static file, at the same URL for everyone.
+                coh = pick_cohort(fetch_cohorts(), payload.get("identity_type", "all"))
+                if coh:
+                    prev = position_text(preview_from_cohort(payload, coh), lang)
+                    if prev:
+                        print("\n".join(prev)); print("\n".join(dry_run_note(lang)))
+            return 0
+        tok = oidc_token()
+        if not tok:
+            print("error: --send needs a GitHub Actions OIDC token "
+                  "(add `permissions: id-token: write` to the job)", file=sys.stderr)
+            return 2
+        try:
+            context_obj = send(payload, tok)
+            position = position_text(context_obj, lang)
+            ctx_status = "sent"
+        except Exception as e:
+            ctx_status = "failed"
+            print(f"note: submission failed ({type(e).__name__}); the ledger below is unaffected",
+                  file=sys.stderr)
     if "--json" in argv:
         rows = [r for r in led["rows"] if not month or r["created_at"][:7] == month]
         led = {**led, "rows": rows, "month": month}
@@ -313,10 +389,12 @@ def main(argv):
             "detection_scope": "all scanned PRs (not filtered by --month)",
             "monthly": [{"month": k, "agent_prs": t, "with_record": r, "without_record": u}
                         for k, t, r, u in monthly(led)],
+            "context": context_obj,
+            "context_status": ctx_status,
             "prs": led["rows"],
         }, indent=2))
         return 0
-    print(render(led, month, lang))
+    print(render(led, month, lang, position))
     return 0
 
 

@@ -1,0 +1,162 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ledger.atelierfactory.jp/v1/schema/payload-1.0.json",
+  "title": "agent-pr-ledger submission payload v1.0",
+  "description": "The complete list of what this service accepts. Anything not listed here causes the whole request to be rejected — not ignored. transparency.json is generated from this file, so the documentation cannot drift from the validator.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "payload_version",
+    "definition_version",
+    "tool_version",
+    "scanned_prs",
+    "agent_prs",
+    "merged_with_review_record",
+    "merged_without_review_record",
+    "not_merged",
+    "identity_type",
+    "detection"
+  ],
+  "properties": {
+    "payload_version": {
+      "const": "1.0"
+    },
+    "definition_version": {
+      "type": "string",
+      "pattern": "^[0-9]+\\.[0-9]+$"
+    },
+    "tool_version": {
+      "type": "string",
+      "maxLength": 20,
+      "pattern": "^[0-9.]+$"
+    },
+    "scanned_prs": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 100000
+    },
+    "agent_prs": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 100000
+    },
+    "merged_with_review_record": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 100000
+    },
+    "merged_without_review_record": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 100000
+    },
+    "not_merged": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 100000
+    },
+    "identity_type": {
+      "enum": [
+        "bot",
+        "self",
+        "mixed",
+        "none"
+      ]
+    },
+    "size_bucket": {
+      "enum": [
+        "1-9",
+        "10-49",
+        "50-199",
+        "200-999",
+        "1000+"
+      ]
+    },
+    "detection": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "author",
+        "branch",
+        "body",
+        "trace",
+        "none"
+      ],
+      "properties": {
+        "author": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 100000
+        },
+        "branch": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 100000
+        },
+        "body": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 100000
+        },
+        "trace": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 100000
+        },
+        "none": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 100000
+        }
+      }
+    },
+    "monthly": {
+      "type": "array",
+      "maxItems": 120,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "month",
+          "with_record",
+          "without_record"
+        ],
+        "properties": {
+          "month": {
+            "type": "string",
+            "pattern": "^[0-9]{4}-[0-9]{2}$"
+          },
+          "with_record": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 100000
+          },
+          "without_record": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 100000
+          }
+        }
+      }
+    },
+    "link": {
+      "type": "boolean",
+      "description": "If true, the submission is stored under a pseudonymous, cross-service identifier (AF-ID) so that this repository's submissions connect over time. If absent or false, the submission is stored with a dedup key that rotates monthly and cannot be linked across months."
+    }
+  },
+  "x-never-accepted": [
+    "repository name (taken from the signed OIDC token instead)",
+    "owner or user names",
+    "email addresses",
+    "IP addresses",
+    "file names",
+    "paths",
+    "code",
+    "diffs",
+    "commit messages",
+    "branch names",
+    "PR titles or bodies",
+    "tokens or credentials",
+    "free text of any kind"
+  ]
+}

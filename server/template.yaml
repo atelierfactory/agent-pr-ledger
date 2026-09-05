@@ -1,0 +1,311 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: >
+  agent-pr-ledger. One write path (ingest Lambda), one read path (S3 via CloudFront).
+  No compute on the read path. No access logs. Nothing stored carries a repository name;
+  aggregates are the only published output.
+
+Parameters:
+  DomainName:
+    Type: String
+    Default: ledger.atelierfactory.jp
+  CertificateArn:
+    Type: String
+    Description: ACM certificate in us-east-1
+
+
+Resources:
+
+  # ── Public records live here. The bucket itself is never public; only CloudFront's OAC reads it──
+  # The cross-service pseudonym key. Non-exportable by construction: MACs are computed
+  # inside KMS and the material cannot be retrieved. Rotating it would sever every
+  # existing link, so it is treated as permanent.
+  AfIdKey:
+    Type: AWS::KMS::Key
+    Properties:
+      Description: aTELiER FACTORY cross-service pseudonym (AF-ID)
+      KeyUsage: GENERATE_VERIFY_MAC
+      KeySpec: HMAC_256
+      KeyPolicy:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal: {AWS: !Sub "arn:aws:iam::${AWS::AccountId}:root"}
+            Action: "kms:*"
+            Resource: "*"
+
+  # Deletes last month's dedup salt. This deletion is what makes the rotation real:
+  # once it is gone, the previous month's keys cannot be recomputed by anyone.
+  SaltRotation:
+    Type: AWS::Events::Rule
+    Properties:
+      ScheduleExpression: "cron(0 4 2 * ? *)"
+      State: ENABLED
+      Targets:
+        - Id: purge
+          Arn: !GetAtt SaltPurgeFunction.Arn
+
+  SaltPurgeFunction:
+    Type: AWS::Lambda::Function
+    Properties:
+      Runtime: python3.12
+      Handler: index.handler
+      Timeout: 30
+      Role: !GetAtt SaltPurgeRole.Arn
+      Code:
+        ZipFile: |
+          import boto3, datetime
+          def handler(event, context):
+              ssm = boto3.client("ssm")
+              keep = {datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m")}
+              p = ssm.get_paginator("describe_parameters")
+              for page in p.paginate(ParameterFilters=[{"Key": "Name", "Option": "BeginsWith",
+                                                        "Values": ["/ledger/dedup-salt/"]}]):
+                  for prm in page["Parameters"]:
+                      if prm["Name"].rsplit("/", 1)[-1] not in keep:
+                          ssm.delete_parameter(Name=prm["Name"])
+              return {"kept": sorted(keep)}
+
+  SaltPurgeRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Statement:
+          - Effect: Allow
+            Principal: {Service: lambda.amazonaws.com}
+            Action: sts:AssumeRole
+      Policies:
+        - PolicyName: purge-old-salts
+          PolicyDocument:
+            Statement:
+              - Effect: Allow
+                Action: [ssm:DescribeParameters, ssm:DeleteParameter]
+                Resource: "*"
+              - Effect: Allow
+                Action: [logs:CreateLogGroup, logs:CreateLogStream, logs:PutLogEvents]
+                Resource: !Sub "arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/*"
+
+  SaltPurgePermission:
+    Type: AWS::Lambda::Permission
+    Properties:
+      FunctionName: !Ref SaltPurgeFunction
+      Action: lambda:InvokeFunction
+      Principal: events.amazonaws.com
+      SourceArn: !GetAtt SaltRotation.Arn
+
+  RecordBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
+      BucketEncryption:
+        ServerSideEncryptionConfiguration:
+          - ServerSideEncryptionByDefault: {SSEAlgorithm: AES256}
+      VersioningConfiguration: {Status: Enabled}   # records are append-only in effect; overwrite history is kept
+      LifecycleConfiguration:
+        Rules:
+          # Anonymous points are raw material for the published aggregates; keep one year.
+          - Id: expire-points-1y
+            Status: Enabled
+            Prefix: internal/points/
+            ExpirationInDays: 365
+            # Versioning is on, so an expiry alone would only add a delete marker.
+            NoncurrentVersionExpirationInDays: 30
+
+  RecordBucketPolicy:
+    Type: AWS::S3::BucketPolicy
+    Properties:
+      Bucket: !Ref RecordBucket
+      PolicyDocument:
+        Statement:
+          - Effect: Allow
+            Principal: {Service: cloudfront.amazonaws.com}
+            Action: s3:GetObject
+            Resource: !Sub "${RecordBucket.Arn}/*"
+            Condition:
+              StringEquals:
+                AWS:SourceArn: !Sub "arn:aws:cloudfront::${AWS::AccountId}:distribution/${Distribution}"
+
+  # ── the only write path ──────────────────────────────────────────
+  IngestFunction:
+    Type: AWS::Lambda::Function
+    Properties:
+      Runtime: python3.12
+      Handler: ingest.handler
+      Timeout: 10
+      MemorySize: 256
+      ReservedConcurrentExecutions: 20      # cap runaway invocations at the function
+      Environment:
+        Variables:
+          RECORD_BUCKET: !Ref RecordBucket
+          AF_ID_KEY_ID: !Ref AfIdKey
+          SALT_PARAM_PREFIX: /ledger/dedup-salt/
+      Role: !GetAtt IngestRole.Arn
+      Code: {ZipFile: "placeholder — deployed from the repository"}
+
+  IngestRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Statement:
+          - Effect: Allow
+            Principal: {Service: lambda.amazonaws.com}
+            Action: sts:AssumeRole
+      Policies:
+        - PolicyName: write-records-only
+          PolicyDocument:
+            Statement:
+              # The function can only append points. Neither prefix carries a repository
+              # name: internal/points/ is salted per month, internal/linked/ is pseudonymous.
+              - Effect: Allow
+                Action: s3:PutObject
+                Resource:
+                  - !Sub "${RecordBucket.Arn}/internal/points/*"
+                  - !Sub "${RecordBucket.Arn}/internal/linked/*"
+              # AF-ID is computed inside KMS. The key never leaves it, and we cannot export it.
+              - Effect: Allow
+                Action: kms:GenerateMac
+                Resource: !GetAtt AfIdKey.Arn
+              # This month's dedup salt. Last month's is deleted by SaltRotation below.
+              - Effect: Allow
+                Action: [ssm:GetParameter, ssm:PutParameter]
+                Resource: !Sub "arn:aws:ssm:${AWS::Region}:${AWS::AccountId}:parameter/ledger/dedup-salt/*"
+              - Effect: Allow
+                Action: s3:GetObject
+                Resource: !Sub "${RecordBucket.Arn}/v1/cohort/*"
+              - Effect: Allow
+                Action: [logs:CreateLogGroup, logs:CreateLogStream, logs:PutLogEvents]
+                Resource: !Sub "arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/*"
+
+  # Lets CloudFront invoke the Function URL.
+  # Without this the stack deploys but every request returns 403.
+  IngestUrlPermission:
+    Type: AWS::Lambda::Permission
+    Properties:
+      FunctionName: !Ref IngestFunction
+      Action: lambda:InvokeFunctionUrl
+      Principal: cloudfront.amazonaws.com
+      FunctionUrlAuthType: AWS_IAM
+      SourceArn: !Sub "arn:aws:cloudfront::${AWS::AccountId}:distribution/${Distribution}"
+
+  IngestUrl:
+    Type: AWS::Lambda::Url
+    Properties:
+      TargetFunctionArn: !GetAtt IngestFunction.Arn
+      AuthType: AWS_IAM                      # only CloudFront's OAC signature is accepted
+
+  # ── read path: not one unit of compute ──────────────────────
+  Distribution:
+    Type: AWS::CloudFront::Distribution
+    Properties:
+      DistributionConfig:
+        Enabled: true
+        Aliases: [!Ref DomainName]
+        ViewerCertificate:
+          AcmCertificateArn: !Ref CertificateArn
+          SslSupportMethod: sni-only
+          MinimumProtocolVersion: TLSv1.2_2021
+        # No Logging block: access logs are never collected, so we never hold a viewer's IP
+        WebACLId: !GetAtt WebACL.Arn
+        Origins:
+          - Id: records
+            DomainName: !GetAtt RecordBucket.RegionalDomainName
+            S3OriginConfig: {}
+            OriginAccessControlId: !GetAtt OAC.Id
+          - Id: ingest
+            DomainName: !Select [2, !Split ["/", !GetAtt IngestUrl.FunctionUrl]]
+            CustomOriginConfig: {OriginProtocolPolicy: https-only}
+            OriginAccessControlId: !GetAtt LambdaOAC.Id
+        DefaultCacheBehavior:
+          TargetOriginId: records
+          ViewerProtocolPolicy: redirect-to-https
+          AllowedMethods: [GET, HEAD]
+          CachePolicyId: 658327ea-f89d-4fab-a63d-7e88639e58f6   # CachingOptimized
+        CacheBehaviors:
+          - PathPattern: /v1/submit
+            TargetOriginId: ingest
+            ViewerProtocolPolicy: https-only
+            AllowedMethods: [GET, HEAD, OPTIONS, PUT, POST, PATCH, DELETE]
+            CachePolicyId: 4135ea2d-6df8-44a3-9df3-4b5a84be39ad   # CachingDisabled
+            OriginRequestPolicyId: !Ref SubmitOriginPolicy
+        CustomErrorResponses:
+          - ErrorCode: 404
+            ResponseCode: 404
+            ResponsePagePath: /404.json
+
+  SubmitOriginPolicy:
+    Type: AWS::CloudFront::OriginRequestPolicy
+    Properties:
+      OriginRequestPolicyConfig:
+        Name: ledger-submit-headers
+        HeadersConfig:
+          HeaderBehavior: whitelist
+          # Forward nothing we do not use. viewer-country returns when country counts are implemented.
+          Headers: [authorization, content-type]
+        CookiesConfig: {CookieBehavior: none}
+        QueryStringsConfig: {QueryStringBehavior: none}
+
+  OAC:
+    Type: AWS::CloudFront::OriginAccessControl
+    Properties:
+      OriginAccessControlConfig:
+        Name: ledger-s3-oac
+        OriginAccessControlOriginType: s3
+        SigningBehavior: always
+        SigningProtocol: sigv4
+
+  LambdaOAC:
+    Type: AWS::CloudFront::OriginAccessControl
+    Properties:
+      OriginAccessControlConfig:
+        Name: ledger-lambda-oac
+        OriginAccessControlOriginType: lambda
+        SigningBehavior: always
+        SigningProtocol: sigv4
+
+  # ── assume it will be attacked──────────────────────────────
+  WebACL:
+    Type: AWS::WAFv2::WebACL
+    Properties:
+      Scope: CLOUDFRONT
+      DefaultAction: {Allow: {}}
+      VisibilityConfig:
+        SampledRequestsEnabled: false        # keep no sampled request contents
+        CloudWatchMetricsEnabled: true       # aggregate metrics only
+        MetricName: ledger
+      Rules:
+        - Name: rate-limit-submit
+          Priority: 0
+          Action: {Block: {}}
+          Statement:
+            RateBasedStatement:
+              Limit: 100                     # per IP, per 5 minutes
+              AggregateKeyType: IP
+              ScopeDownStatement:
+                ByteMatchStatement:
+                  FieldToMatch: {UriPath: {}}
+                  PositionalConstraint: STARTS_WITH
+                  SearchString: /v1/submit
+                  TextTransformations: [{Priority: 0, Type: NONE}]
+          VisibilityConfig:
+            SampledRequestsEnabled: false
+            CloudWatchMetricsEnabled: true
+            MetricName: rate-limit-submit
+        - Name: rate-limit-read
+          Priority: 1
+          Action: {Block: {}}
+          Statement:
+            RateBasedStatement: {Limit: 20000, AggregateKeyType: IP}
+          VisibilityConfig:
+            SampledRequestsEnabled: false
+            CloudWatchMetricsEnabled: true
+            MetricName: rate-limit-read
+
+Outputs:
+  Endpoint:
+    Value: !Sub "https://${DomainName}/v1/submit"
+
+  CohortBase:
+    Value: !Sub "https://${DomainName}/v1/cohort/"

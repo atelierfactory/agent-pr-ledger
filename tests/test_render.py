@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
-"""表示ロジックの検証。GitHub APIを叩かずに、代表的な形を全部通す。
+"""Rendering checks. Runs every representative shape without touching the GitHub API.
 
-とくに確認したいこと：
-- 審査記録なしが1件でもあれば、警告行が必ず最初に出る（パーセンタイルを免罪符にしない）
-- 記録なしがゼロなら、警告ではなく事実を書く
-- エージェント間の比較を煽らない
+What these guard:
+- if even one merge lacks a review record, that line appears before any comparison
+- when none lack a record, state the fact rather than warn
+- never invite comparison between agents
 """
 import os, sys, json
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "src"))
@@ -19,34 +19,34 @@ def row(n, agent, itype, how, ym, outcome):
 
 
 CASES = {
-    "記録なしが多数（本人名義型）": dict(
+    "mostly unrecorded (human-authored type)": dict(
         rows=[row(i, "OpenAI_Codex", "self", "branch", "2025-07",
                   "unrecorded" if i < 24 else "recorded" if i < 35 else "not_merged")
               for i in range(42)],
         coverage={"author": 0, "branch": 42, "body": 0, "unknown": 5}),
-    "記録なしがゼロ（ボット名義型）": dict(
+    "none unrecorded (bot-authored type)": dict(
         rows=[row(i, "Copilot", "bot", "author", "2025-07",
                   "recorded" if i < 10 else "not_merged") for i in range(17)],
         coverage={"author": 17, "branch": 0, "body": 0, "unknown": 3}),
-    "マージが1件も無い": dict(
+    "nothing merged": dict(
         rows=[row(i, "Cursor", "self", "branch", "2025-07", "not_merged") for i in range(4)],
         coverage={"author": 0, "branch": 4, "body": 0, "unknown": 0}),
-    "エージェントPRがゼロ": dict(rows=[], coverage={"none": 30}),
+    "no agent PRs at all": dict(rows=[], coverage={"none": 30}),
 }
 
-# 判定の偽陽性ケース（人間のPRに co-authored-by トレーラーが1行あるだけ）
+# Known false positives: a human PR carrying a single co-authored-by trailer
 from ledger import classify
 FP = [
     ({"user": {"login": "alice"}, "head": {"ref": "fix/typo"},
       "body": "Co-Authored-By: Claude <noreply@anthropic.com>"}, "body",
-     "人間のPRにトレーラー1行 → エージェント作と判定される（既知の偽陽性）"),
+     "human PR with one trailer -> classified as agent-authored (known false positive)"),
     ({"user": {"login": "bob"}, "head": {"ref": "codex/experiment"}, "body": ""}, "branch",
-     "人間が codex/ をブランチ名に使った場合（既知の偽陽性）"),
+     "human using a codex/ branch name (known false positive)"),
 ]
-print("=" * 66); print("■ 既知の偽陽性（精度検証で必ず測る）"); print("=" * 66)
+print("=" * 66); print("Known false positives (always measured in the precision check)"); print("=" * 66)
 for pr_, expect, note in FP:
     a, how = classify(pr_)
-    print(f"  {note}\n    → 判定 {how} / agent={a}")
+    print(f"  {note}\n    -> classified {how} / agent={a}")
 print()
 
 fails = []
@@ -63,18 +63,31 @@ for name, d in CASES.items():
                      if "% of merged agent PRs have no review record" in l), None)
     if unrec:
         if warn_idx is None:
-            fails.append(f"{name}: 記録なしが{len(unrec)}件あるのに警告行が出ていない")
+            fails.append(f"{name}: {len(unrec)} unrecorded merges but no warning line")
         else:
             before = lines[:warn_idx]
             if any(("median" in l or "percentile" in l or "distribution" in l or "母集団" in l) for l in before):
-                fails.append(f"{name}: 警告行より前に比較の文脈が出ている（免罪符になる）")
+                fails.append(f"{name}: comparison appears before the warning line (reads as absolution)")
     else:
         if warn_idx is not None:
-            fails.append(f"{name}: 記録なしがゼロなのに警告行が出ている")
+            fails.append(f"{name}: warning line shown although nothing is unrecorded")
     if any(w in out for w in ("better than", "ranking", "score", "grade", "より優れて")):
-        fails.append(f"{name}: 優劣の表現が混入している")
+        fails.append(f"{name}: comparative or evaluative wording leaked in")
+
+# Mutually exclusive flags: never silently pick one (a --dry-run must never send)
+import subprocess, os
+ROOT = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..")
+print("=" * 66); print("Mutually exclusive flags"); print("=" * 66)
+for combo in (["--dry-run","--send"], ["--preview","--send"], ["--dry-run","--preview"]):
+    r = subprocess.run([sys.executable, os.path.join(ROOT,"src","ledger.py"), "a/b", "10", *combo],
+                       capture_output=True, text=True, timeout=30)
+    ok = r.returncode == 2 and "mutually exclusive" in r.stderr
+    print(f"  {' '.join(combo):24} → {'exits 2' if ok else '*** ACCEPTED — must not be'}")
+    if not ok:
+        fails.append(f"mutually exclusive flags {combo} were not rejected")
+print()
 
 print("=" * 66)
 if fails:
-    print("失敗:"); [print("  -", f) for f in fails]; sys.exit(1)
-print(f"すべて通過（{len(CASES)}ケース）")
+    print("FAILED:"); [print("  -", f) for f in fails]; sys.exit(1)
+print(f"all passed ({len(CASES)} cases)")

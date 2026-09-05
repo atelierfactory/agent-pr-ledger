@@ -1,6 +1,19 @@
 name: Agent PR ledger
 
-# Output goes to the job summary only. This workflow posts nothing to PRs or issues.
+# Output goes to the job summary. This workflow posts nothing to PRs or issues.
+#
+# Three modes. The default sends nothing and contacts nothing but the GitHub API.
+#
+#   send: "false", preview: "false"  (default) — fully offline apart from GitHub
+#   preview: "true"                  — fetches ONE public file to show what you would get back
+#   send: "true"                     — transmits counts + a GitHub OIDC token. Your repository
+#                                      name is not stored; only aggregates are published
+#   link: "true"                     — (with send) stores under a pseudonymous identifier so your
+#                                      submissions connect over time. See "Why link?" in the README
+#
+# Setting both preview and send to "true" fails the job rather than picking one.
+#
+# The line below lives in your repository and your git history, not ours.
 
 on:
   workflow_dispatch:
@@ -10,6 +23,12 @@ on:
 permissions:
   contents: read
   pull-requests: read
+  # id-token: write   # uncomment only if you set send: true below
+
+env:
+  send: "false"
+  preview: "false"
+  link: "false"
 
 jobs:
   ledger:
@@ -23,12 +42,17 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          python3 src/ledger.py "${GITHUB_REPOSITORY}" 300 --lang en > ledger.txt
+          if [ "${{ env.preview }}" = "true" ] && [ "${{ env.send }}" = "true" ]; then
+            echo "error: preview and send are mutually exclusive" >&2
+            exit 1
+          fi
+          LINK=""
+          [ "${{ env.link }}" = "true" ] && LINK=--link
+          MODE=--dry-run
+          [ "${{ env.preview }}" = "true" ] && MODE=--preview
+          [ "${{ env.send }}" = "true" ] && MODE=--send
+          python3 src/ledger.py "${GITHUB_REPOSITORY}" 300 --lang en $MODE $LINK > ledger.txt
           cat ledger.txt
       - name: Write job summary
         run: |
-          {
-            echo '```'
-            cat ledger.txt
-            echo '```'
-          } >> "$GITHUB_STEP_SUMMARY"
+          { echo '```'; cat ledger.txt; echo '```'; } >> "$GITHUB_STEP_SUMMARY"

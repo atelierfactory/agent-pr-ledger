@@ -1,0 +1,328 @@
+{
+ "schema": "agent-pr-ledger/cohorts-1",
+ "cohort_version": "2026-08",
+ "build": "2026-08-13a",
+ "definition_version": "1.0",
+ "note": "All cohorts are shipped in one file so that fetching it reveals nothing about the caller. The client selects its own cohort locally.",
+ "cohorts": {
+  "all": {
+   "cohort_label": "all repositories",
+   "metric": "share of merged agent PRs without a review record",
+   "n": 490,
+   "source": "AIDev (huggingface hao-li/AIDev), agent PRs 2024-12..2025-07, repositories with >=5 merged agent PRs",
+   "freshness": "Derived from public data through 2025-07. It becomes more current as submissions accumulate.",
+   "shape_warning": "Bimodal. Rank carries little information near the ends; use regime shares.",
+   "regimes": {
+    "all_unrecorded": 0.4163,
+    "some_record": 0.5837,
+    "all_recorded": 0.2041
+   },
+   "grid": [
+    0.0,
+    0.05,
+    0.1,
+    0.15,
+    0.2,
+    0.25,
+    0.3,
+    0.35,
+    0.4,
+    0.45,
+    0.5,
+    0.55,
+    0.6,
+    0.65,
+    0.7,
+    0.75,
+    0.8,
+    0.85,
+    0.9,
+    0.95,
+    1.0
+   ],
+   "at_or_above": [
+    1.0,
+    0.7816,
+    0.7673,
+    0.7286,
+    0.7102,
+    0.6816,
+    0.6592,
+    0.6408,
+    0.6265,
+    0.6102,
+    0.602,
+    0.5939,
+    0.5796,
+    0.5633,
+    0.5449,
+    0.5388,
+    0.5245,
+    0.4816,
+    0.4653,
+    0.4408,
+    0.4163
+   ],
+   "trend": [],
+   "summary": {
+    "median": 0.8102
+   },
+   "trend_note": "Not published for the combined cohort. The apparent movement (0.31 to 0.85) is almost entirely a composition shift: agent PRs arriving under human accounts grew rapidly from 2025-05. Within-type trends are published instead.",
+   "cohort_rule": "Repositories are assigned to exactly one cohort by the posting-identity type that accounts for more than 50% of their merged agent PRs. A repository is never counted in two cohorts.",
+   "mass": [
+    0.2061,
+    0.0163,
+    0.0306,
+    0.0347,
+    0.0286,
+    0.0122,
+    0.0163,
+    0.0184,
+    0.0224,
+    0.0122,
+    0.0061,
+    0.0122,
+    0.0143,
+    0.0245,
+    0.0041,
+    0.0122,
+    0.0347,
+    0.0143,
+    0.0265,
+    0.0245,
+    0.4286
+   ],
+   "mass_note": "Share of the cohort falling in each 0.05-wide cell. Used to report how many repositories sit at the caller's value."
+  },
+  "bot": {
+   "cohort_label": "repositories where agent PRs arrive under a bot account",
+   "metric": "share of merged agent PRs without a review record",
+   "n": 173,
+   "source": "AIDev (huggingface hao-li/AIDev), agent PRs 2024-12..2025-07, repositories with >=5 merged agent PRs",
+   "freshness": "Derived from public data through 2025-07. It becomes more current as submissions accumulate.",
+   "shape_warning": "Bimodal. Rank carries little information near the ends; use regime shares.",
+   "regimes": {
+    "all_unrecorded": 0.0173,
+    "some_record": 0.9827,
+    "all_recorded": 0.4566
+   },
+   "grid": [
+    0.0,
+    0.05,
+    0.1,
+    0.15,
+    0.2,
+    0.25,
+    0.3,
+    0.35,
+    0.4,
+    0.45,
+    0.5,
+    0.55,
+    0.6,
+    0.65,
+    0.7,
+    0.75,
+    0.8,
+    0.85,
+    0.9,
+    0.95,
+    1.0
+   ],
+   "at_or_above": [
+    1.0,
+    0.5145,
+    0.4913,
+    0.4277,
+    0.3931,
+    0.3526,
+    0.3121,
+    0.2832,
+    0.2543,
+    0.2312,
+    0.2197,
+    0.2081,
+    0.185,
+    0.1618,
+    0.1445,
+    0.1387,
+    0.1214,
+    0.0751,
+    0.0578,
+    0.0289,
+    0.0173
+   ],
+   "trend": [
+    {
+     "month": "2025-01",
+     "prs": 157,
+     "without_record": 0.293
+    },
+    {
+     "month": "2025-02",
+     "prs": 195,
+     "without_record": 0.4564
+    },
+    {
+     "month": "2025-03",
+     "prs": 343,
+     "without_record": 0.3178
+    },
+    {
+     "month": "2025-04",
+     "prs": 471,
+     "without_record": 0.3822
+    },
+    {
+     "month": "2025-05",
+     "prs": 893,
+     "without_record": 0.3404
+    },
+    {
+     "month": "2025-06",
+     "prs": 1337,
+     "without_record": 0.2177
+    },
+    {
+     "month": "2025-07",
+     "prs": 1336,
+     "without_record": 0.2275
+    }
+   ],
+   "summary": {
+    "median": 0.0783
+   },
+   "trend_note": "Within-type trend. Composition across types is held out, so this is not a composition artifact. Monthly points with fewer than 50 PRs are omitted.",
+   "cohort_rule": "Repositories are assigned to exactly one cohort by the posting-identity type that accounts for more than 50% of their merged agent PRs. A repository is never counted in two cohorts.",
+   "mass": [
+    0.4624,
+    0.0347,
+    0.0462,
+    0.0578,
+    0.0462,
+    0.0173,
+    0.0347,
+    0.0289,
+    0.0289,
+    0.0231,
+    0.0116,
+    0.0173,
+    0.0173,
+    0.0289,
+    0.0,
+    0.0231,
+    0.0289,
+    0.0173,
+    0.0347,
+    0.0231,
+    0.0173
+   ],
+   "mass_note": "Share of the cohort falling in each 0.05-wide cell. Used to report how many repositories sit at the caller's value."
+  },
+  "self": {
+   "cohort_label": "repositories where agent PRs arrive under a human account",
+   "metric": "share of merged agent PRs without a review record",
+   "n": 316,
+   "source": "AIDev (huggingface hao-li/AIDev), agent PRs 2024-12..2025-07, repositories with >=5 merged agent PRs",
+   "freshness": "Derived from public data through 2025-07. It becomes more current as submissions accumulate.",
+   "shape_warning": "Bimodal. Rank carries little information near the ends; use regime shares.",
+   "regimes": {
+    "all_unrecorded": 0.6329,
+    "some_record": 0.3671,
+    "all_recorded": 0.0665
+   },
+   "grid": [
+    0.0,
+    0.05,
+    0.1,
+    0.15,
+    0.2,
+    0.25,
+    0.3,
+    0.35,
+    0.4,
+    0.45,
+    0.5,
+    0.55,
+    0.6,
+    0.65,
+    0.7,
+    0.75,
+    0.8,
+    0.85,
+    0.9,
+    0.95,
+    1.0
+   ],
+   "at_or_above": [
+    1.0,
+    0.9272,
+    0.9177,
+    0.8924,
+    0.8829,
+    0.8608,
+    0.8481,
+    0.8354,
+    0.8291,
+    0.8165,
+    0.8101,
+    0.8038,
+    0.7943,
+    0.7816,
+    0.7627,
+    0.7563,
+    0.7437,
+    0.7025,
+    0.6867,
+    0.6646,
+    0.6329
+   ],
+   "trend": [
+    {
+     "month": "2025-05",
+     "prs": 3101,
+     "without_record": 0.8987
+    },
+    {
+     "month": "2025-06",
+     "prs": 7708,
+     "without_record": 0.9184
+    },
+    {
+     "month": "2025-07",
+     "prs": 8341,
+     "without_record": 0.9499
+    }
+   ],
+   "summary": {
+    "median": 1.0
+   },
+   "trend_note": "Within-type trend. Composition across types is held out, so this is not a composition artifact. Monthly points with fewer than 50 PRs are omitted.",
+   "cohort_rule": "Repositories are assigned to exactly one cohort by the posting-identity type that accounts for more than 50% of their merged agent PRs. A repository is never counted in two cohorts.",
+   "mass": [
+    0.0665,
+    0.0063,
+    0.0222,
+    0.0222,
+    0.019,
+    0.0095,
+    0.0063,
+    0.0127,
+    0.019,
+    0.0063,
+    0.0032,
+    0.0095,
+    0.0127,
+    0.0222,
+    0.0063,
+    0.0063,
+    0.038,
+    0.0127,
+    0.0222,
+    0.0253,
+    0.6519
+   ],
+   "mass_note": "Share of the cohort falling in each 0.05-wide cell. Used to report how many repositories sit at the caller's value."
+  }
+ }
+}
