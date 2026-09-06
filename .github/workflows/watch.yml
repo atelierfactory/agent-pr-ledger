@@ -11,6 +11,14 @@ name: Agent PR watch
 on:
   pull_request:
     types: [closed]
+  workflow_dispatch:          # manual check against any public PR, e.g. to see the output before adopting
+    inputs:
+      repo:
+        description: "OWNER/REPO (defaults to this repository)"
+        required: false
+      pr:
+        description: "Pull request number"
+        required: true
 
 permissions:
   contents: read
@@ -28,6 +36,8 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          python3 src/watch.py "${GITHUB_REPOSITORY}" "${{ github.event.pull_request.number }}" --lang en > watch.txt
+          REPO="${{ github.event.inputs.repo || github.repository }}"
+          PR="${{ github.event.inputs.pr || github.event.pull_request.number }}"
+          python3 src/watch.py "$REPO" "$PR" --lang en > watch.txt
           cat watch.txt
           { echo '```'; cat watch.txt; echo '```'; } >> "$GITHUB_STEP_SUMMARY"
