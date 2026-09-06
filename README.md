@@ -1,4 +1,4 @@
-# agent-pr-ledger (v0)
+# agent-pr-ledger (v0.1)
 
 **A ledger of agent-authored pull requests. It counts; it does not score.**
 
@@ -117,7 +117,7 @@ permissions:
 
 Hosts contacted: `api.github.com` always; the Actions token endpoint (`ACTIONS_ID_TOKEN_REQUEST_URL`, a `pipelines*.actions.githubusercontent.com` host) in `--send`, to mint the OIDC token; `ledger.atelierfactory.jp` in `--preview` and `--send`. The server, separately, fetches GitHub's public keys from `token.actions.githubusercontent.com` to check the signature. Redirects away from those hosts are refused before the request is followed, so credentials cannot be forwarded elsewhere.
 
-v0 is not a Marketplace Action. You copy a few readable scripts and a workflow into your own repository and pin them yourself. That is deliberate: a tool asking for your trust should not also ask you to run code you cannot read, from a supply chain you do not control.
+v0.1 is not a Marketplace Action. You copy a few readable scripts and a workflow into your own repository and pin them yourself. That is deliberate: a tool asking for your trust should not also ask you to run code you cannot read, from a supply chain you do not control.
 
 ## Usage
 
@@ -251,7 +251,7 @@ With `--send`, `context` carries what came back:
 
 ## Limitations
 
-This is v0. These are real, and we would rather you know them.
+This is v0.1. These are real, and we would rather you know them.
 
 1. **Detection precision, measured on 2026-09-06.** Against 355 pull requests with published agent labels (AIDev; one PR per repository per agent, six agents), every one was identified and the agent name matched in every case — *after* a fix made during that measurement: Jules posts as `google-labs-jules[bot]` with free-form branch names, and that account was missing from the table, so 0 of 59 Jules PRs were found before the fix. Against 157 pull requests from the same repositories, inside AIDev's window, that AIDev does not label, 9 were classified as agent-authored — an upper bound of 5.7% on false positives.
 
