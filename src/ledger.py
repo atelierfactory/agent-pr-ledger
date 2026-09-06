@@ -23,6 +23,7 @@ BOT_AUTHORS = {
     "copilot-swe-agent[bot]": "Copilot",
     "devin-ai-integration[bot]": "Devin",
     "devin[bot]": "Devin",
+    "google-labs-jules[bot]": "Jules",
 }
 BRANCH_PATTERNS = [
     (re.compile(r"^codex/", re.I), "OpenAI_Codex"),

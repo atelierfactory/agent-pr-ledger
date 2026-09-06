@@ -36,7 +36,7 @@ Three signals, in order. **The output always states which one was used.**
 
 | Signal | Example | Certainty |
 |---|---|---|
-| Author account | `Copilot`, `devin-ai-integration[bot]` | Certain |
+| Author account | `Copilot`, `devin-ai-integration[bot]`, `google-labs-jules[bot]` | Certain |
 | Branch prefix | `codex/…`, `cursor/…`, `claude/…`, `jules/…`, `devin/…` | Inferred |
 | Body signature | `Generated with Claude Code` | Inferred |
 
@@ -45,7 +45,7 @@ Two further outcomes are reported separately and **excluded from the counts**:
 - **`trace`** — an agent-ish signal we could not attribute to a specific agent
 - **`none`** — no agent trace at all. Treated as a human PR, out of scope
 
-Agents posting under a bot account are identified reliably. Agents posting under **your own account** can only be inferred, and **that inference has not been measured yet.** See Limitations.
+Agents posting under a bot account are identified by name. Agents posting under **your own account** can only be inferred. Both paths were checked against a labelled sample on 2026-09-06 (355 labelled agent PRs, 157 unlabelled PRs from the same repositories); see Limitations for the figures and what they do not prove.
 
 ---
 
@@ -143,18 +143,18 @@ As a workflow, see [`.github/workflows/ledger.yml`](.github/workflows/ledger.yml
 
 ### Output
 
-*The example below is generated from synthetic data. It will be replaced with a real run before v0.1.*
+*Real run: `python3 src/ledger.py microsoft/vscode 300 --lang en`, default mode (nothing sent), executed 2026-09-06.*
 
 ```
 📒 Agent PR ledger
-  scanned: the 50 most recent PRs (2025-05-02 to 2025-07-28)
+  scanned: the 300 most recent PRs (2026-09-02 to 2026-09-06)
 
-  Agent PRs in this repository  42   (percentages below are of these)
-    ├ merged with a review record  11 (26%)
-    ├ merged without a review record  24 (57%)
-    └ not merged  7 (17%)
+  Agent PRs in this repository  19   (percentages below are of these)
+    ├ merged with a review record  6 (32%)
+    ├ merged without a review record  0 (0%)
+    └ not merged  13 (68%)
 
-  69% of merged agent PRs have no review record.
+  All 6 merged agent PRs have a review record.
 
   (This is a count, not a judgement — definition v1.0)
   Comparison with other repositories is shown only if you opt in to sending your counts.
@@ -163,18 +163,14 @@ As a workflow, see [`.github/workflows/ledger.yml`](.github/workflows/ledger.yml
   inside the agent's own interface, that review leaves no record on GitHub.
   This counts whether a review record exists — not whether a review happened.
 
-  Classified as: posted under your own account (your own work)
+  Classified as: posted under a bot account (external contribution) (bot 74%, self 26%)
   By agent (conventions differ — do not compare across)
-    OpenAI_Codex    42  no record 69%
+    Copilot         14  no record 0%
+    Claude_Code      5  no record 0%
 
-  Recent months  (rates are of merged PRs)
-    2025-05   14 PRs  (12 merged)  no record 67%
-    2025-06   14 PRs  (12 merged)  no record 67%
-    2025-07   14 PRs  (11 merged)  no record 73%
-
-  Detection: 0 certain (author) / 42 inferred (branch) / 0 inferred (body)
-  ⚠ 2 PR(s) show an agent trace we could not attribute — excluded from the ledger.
-  (6 PR(s) with no agent trace are treated as human PRs and are out of scope.)
+  Detection: 14 certain (author) / 2 inferred (branch) / 3 inferred (body)
+  ⚠ 3 PR(s) show an agent trace we could not attribute — excluded from the ledger.
+  (278 PR(s) with no agent trace are treated as human PRs and are out of scope.)
 ```
 
 ### JSON schema (`--json`)
@@ -237,11 +233,11 @@ With `--send`, `context` carries what came back:
 
 This is v0. These are real, and we would rather you know them.
 
-1. **Detection precision, measured on a small sample.** Against 30 pull requests with published agent labels (AIDev), all 30 were identified, and the agent name matched in every case. Against 14 pull requests from the same repositories that AIDev does not label, 1 was classified as agent-authored — an upper bound of 7% on false positives.
+1. **Detection precision, measured on 2026-09-06.** Against 355 pull requests with published agent labels (AIDev; one PR per repository per agent, six agents), every one was identified and the agent name matched in every case — *after* a fix made during that measurement: Jules posts as `google-labs-jules[bot]` with free-form branch names, and that account was missing from the table, so 0 of 59 Jules PRs were found before the fix. Against 157 pull requests from the same repositories, inside AIDev's window, that AIDev does not label, 9 were classified as agent-authored — an upper bound of 5.7% on false positives.
 
-   That upper bound is soft in both directions. The sample is small, and more importantly **AIDev labels the presence of an agent, not its absence**: a published census of 180M repositories found that bot-account detection recovers only 3.3% of one agent's commits. The single "false positive" had branch `codex/add-.npmignore-…`, which looks more like a Codex PR that the dataset missed than a human coincidence. We report it as a false positive anyway, because we cannot prove otherwise.
+   That upper bound is soft, and probably very loose. **AIDev labels the presence of an agent, not its absence**: 8 of the 9 carry the standard `Generated with Claude Code` trailer or a Devin run link and a `devin/` branch, which makes them agent PRs the dataset missed rather than human coincidences. The remaining one says its commits were "generated with Claude Code assistance" and then reviewed by the author — a human-owned PR with agent-written commits, which this tool counts as agent-authored. Read as "PRs a human would not call agent-authored", the bound is 1 of 157 (0.6%). We report 5.7% anyway, because we cannot prove the other 8 from outside. The 22 PRs from `dependabot[bot]`, `renovate[bot]` and similar were all correctly left out.
 
-   A `Co-Authored-By: Claude` trailer on an otherwise human PR would still be counted as agent-authored.
+   A `Co-Authored-By: Claude` trailer on an otherwise human PR would still be counted as agent-authored. The measurement scripts are in [`tools/`](tools/); the labelled data is public.
 2. **A review record can be produced trivially.** One comment from any third party before the merge is enough. This counts whether the record exists — it cannot tell you whether the review was serious. Treat it as an audit trail, not as evidence of diligence.
 3. **"No record" is not "unreviewed."** See Definition.
 4. **Only the most recent N PRs are scanned**, and reviews, issue comments and inline review comments are each read up to 1,000 per PR (3,000 combined). Long histories are truncated; the scan window is always printed.
