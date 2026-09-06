@@ -1,0 +1,33 @@
+name: Agent PR watch
+
+# Runs once, when a pull request closes. Applies definition v1.0 to that one PR
+# and writes the result to the job summary: was it an agent PR, and if it was
+# merged, does a review record exist?
+#
+# Contacts nothing but the GitHub API. Posts nothing to the PR. Never fails the
+# job on its own — add `--fail-on-unrecorded` to the command below if your
+# repository wants a gate; that is your policy, not this tool's.
+
+on:
+  pull_request:
+    types: [closed]
+
+permissions:
+  contents: read
+  pull-requests: read
+
+jobs:
+  watch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - uses: actions/setup-python@0b93645e9fea7318ecaed2b359559ac225c90a2b # v5.3.0
+        with:
+          python-version: "3.11"
+      - name: Watch this pull request
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          python3 src/watch.py "${GITHUB_REPOSITORY}" "${{ github.event.pull_request.number }}" --lang en > watch.txt
+          cat watch.txt
+          { echo '```'; cat watch.txt; echo '```'; } >> "$GITHUB_STEP_SUMMARY"

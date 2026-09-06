@@ -105,6 +105,12 @@ class GitHub:
                     time.sleep(float(wait) if wait else 2 ** attempt)
                     continue
                 raise
+            except (urllib.error.URLError, ConnectionError, TimeoutError) as e:
+                # a dropped connection, not an answer: try again, then give up loudly
+                if attempt < 2:
+                    time.sleep(2 ** attempt)
+                    continue
+                raise
 
     def paged(self, path: str, extra: dict | None = None, cap: int = 1000):
         out, page = [], 1

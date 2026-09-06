@@ -117,7 +117,7 @@ permissions:
 
 Hosts contacted: `api.github.com` always; the Actions token endpoint (`ACTIONS_ID_TOKEN_REQUEST_URL`, a `pipelines*.actions.githubusercontent.com` host) in `--send`, to mint the OIDC token; `ledger.atelierfactory.jp` in `--preview` and `--send`. The server, separately, fetches GitHub's public keys from `token.actions.githubusercontent.com` to check the signature. Redirects away from those hosts are refused before the request is followed, so credentials cannot be forwarded elsewhere.
 
-v0 is not a Marketplace Action. You copy one readable script and a workflow into your own repository and pin them yourself. That is deliberate: a tool asking for your trust should not also ask you to run code you cannot read, from a supply chain you do not control.
+v0 is not a Marketplace Action. You copy a few readable scripts and a workflow into your own repository and pin them yourself. That is deliberate: a tool asking for your trust should not also ask you to run code you cannot read, from a supply chain you do not control.
 
 ## Usage
 
@@ -140,6 +140,26 @@ Requires Python 3.9+. With `GITHUB_TOKEN` set the API allows 5,000 requests/hour
 `LEDGER_BASE` and `LEDGER_ENDPOINT` override where `--preview` and `--send` connect. They exist for testing; **setting them sends your data somewhere else**, so treat them as you would any endpoint override.
 
 As a workflow, see [`.github/workflows/ledger.yml`](.github/workflows/ledger.yml).
+
+### Watch mode — one PR, at the moment it closes
+
+The ledger looks back once a month. Watch mode applies the same definition to a **single pull request** when it closes, so the answer is in the job summary while the merge is still fresh:
+
+```bash
+python3 src/watch.py OWNER/REPO PR_NUMBER [--lang en|ja] [--json] [--fail-on-unrecorded]
+```
+
+```
+📒 Agent PR watch — microsoft/vscode#334224
+  Agent: Copilot  (detected by author, certain; posts as a bot account (external contribution))
+  Merged WITH a review record: someone other than the author left a review or comment before the merge.
+  "No record" does not mean nobody looked; a review inside the agent's own interface leaves no record here.
+  (This is a count, not a judgement — definition v1.0)
+```
+
+A PR with no agent trace is reported as out of scope and nothing else happens. Watch mode contacts nothing but the GitHub API, posts nothing to the PR, and **exits 0 whatever it finds**. `--fail-on-unrecorded` makes it exit 1 on a merge without a review record; that turns a count into a gate, which is a policy decision for your repository, so it is off unless you write it into your workflow. There is no exchange in watch mode: nothing is ever sent from it.
+
+As a workflow, see [`.github/workflows/watch.yml`](.github/workflows/watch.yml) (`pull_request: closed`, read-only permissions).
 
 ### Output
 
