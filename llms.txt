@@ -42,6 +42,9 @@ Measured 2026-09-06 against AIDev labels: 355 of 355 labelled agent PRs identifi
 
 Add `with: pr: ${{ github.event.pull_request.number }}` on a `pull_request: closed` trigger for watch mode.
 
+## As an MCP server / Python package
+pip install agent-pr-ledger (pending release) — commands: agent-pr-ledger, agent-pr-watch, agent-pr-ledger-mcp (MCP server on stdio; tools agent_pr_ledger and agent_pr_watch). MCP registry name: io.github.atelierfactory/agent-pr-ledger. Source: https://github.com/atelierfactory/agent-pr-ledger/blob/main/src/mcp_server.py
+
 ## Files
 - Web page (schema.org markup): https://atelierfactory.github.io/agent-pr-ledger/
 - Release v0.1: https://github.com/atelierfactory/agent-pr-ledger/releases/tag/v0.1

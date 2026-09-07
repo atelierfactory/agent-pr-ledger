@@ -1,0 +1,37 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "agent-pr-ledger"
+version = "0.1.0"
+description = "A ledger of agent-authored pull requests. Counts merges with and without a human review record (definition v1.0). It counts; it does not score."
+readme = "PYPI_README.md"
+license = "MIT"
+requires-python = ">=3.9"
+authors = [{name = "aTELiER FACTORY"}]
+keywords = ["coding agents", "pull requests", "code review", "audit", "github actions", "mcp", "copilot", "devin", "codex", "cursor", "claude code"]
+classifiers = [
+  "Development Status :: 4 - Beta",
+  "Environment :: Console",
+  "Intended Audience :: Developers",
+  "Programming Language :: Python :: 3",
+  "Topic :: Software Development :: Quality Assurance",
+  "Topic :: Software Development :: Version Control :: Git",
+]
+dependencies = []
+
+[project.urls]
+Homepage = "https://atelierfactory.github.io/agent-pr-ledger/"
+Repository = "https://github.com/atelierfactory/agent-pr-ledger"
+"Machine summary (llms.txt)" = "https://github.com/atelierfactory/agent-pr-ledger/blob/main/llms.txt"
+Citation = "https://github.com/atelierfactory/agent-pr-ledger/blob/main/CITATION.cff"
+
+[project.scripts]
+agent-pr-ledger = "ledger:cli"
+agent-pr-watch = "watch:cli"
+agent-pr-ledger-mcp = "mcp_server:cli"
+
+[tool.setuptools]
+package-dir = {"" = "src"}
+py-modules = ["ledger", "submit", "watch", "mcp_server"]

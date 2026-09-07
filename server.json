@@ -1,0 +1,19 @@
+{
+  "$schema": "https://static.modelcontextprotocol.io/schemas/2025-07-09/server.json",
+  "name": "io.github.atelierfactory/agent-pr-ledger",
+  "description": "Counts agent-authored pull requests merged with and without a human review record (definition v1.0). It counts; it does not score. Read-only.",
+  "repository": {"url": "https://github.com/atelierfactory/agent-pr-ledger", "source": "github"},
+  "version": "0.1.0",
+  "packages": [
+    {
+      "registry_type": "pypi",
+      "identifier": "agent-pr-ledger",
+      "version": "0.1.0",
+      "runtime_hint": "uvx",
+      "transport": {"type": "stdio"},
+      "environment_variables": [
+        {"name": "GITHUB_TOKEN", "description": "GitHub token (read-only use). Optional; raises the API limit from 60 to 5,000 requests/hour.", "is_required": false, "is_secret": true}
+      ]
+    }
+  ]
+}

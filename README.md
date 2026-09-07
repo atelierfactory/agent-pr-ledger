@@ -151,6 +151,10 @@ Requires Python 3.9+. With `GITHUB_TOKEN` set the API allows 5,000 requests/hour
 
 As a workflow, see [`.github/workflows/ledger.yml`](.github/workflows/ledger.yml).
 
+### As a package or an MCP server
+
+`pip install agent-pr-ledger` installs three commands: `agent-pr-ledger` (the ledger), `agent-pr-watch` (one PR) and `agent-pr-ledger-mcp`, an [MCP](https://modelcontextprotocol.io) server on stdio that exposes the same two operations as tools (`agent_pr_ledger`, `agent_pr_watch`) to any MCP client. Same code, same definition, same read-only network behaviour. *(The PyPI release is pending; until then, run the scripts from a checkout.)*
+
 ### Watch mode — one PR, at the moment it closes
 
 The ledger looks back once a month. Watch mode applies the same definition to a **single pull request** when it closes, so the answer is in the job summary while the merge is still fresh:
