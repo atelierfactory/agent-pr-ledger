@@ -1,0 +1,79 @@
+name: "agent-pr-ledger"
+description: "A ledger of agent-authored pull requests. Counts merges with and without a human review record (definition v1.0). Read-only. It counts; it does not score."
+author: "aTELiER FACTORY"
+branding:
+  icon: "book-open"
+  color: "gray-dark"
+
+inputs:
+  repo:
+    description: "OWNER/REPO to scan. Defaults to the repository running the workflow."
+    required: false
+    default: ${{ github.repository }}
+  limit:
+    description: "How many of the most recent pull requests to scan (ledger mode)."
+    required: false
+    default: "300"
+  lang:
+    description: "Output language: en or ja."
+    required: false
+    default: "en"
+  pr:
+    description: "A pull request number. When set, runs watch mode on that one PR instead of the ledger."
+    required: false
+    default: ""
+  mode:
+    description: "Exchange mode for ledger runs: none (default, nothing leaves the runner except GitHub API calls), dry-run, preview, or send. send needs permissions: id-token: write and only works on public repositories."
+    required: false
+    default: "none"
+  link:
+    description: "With mode=send, store under a pseudonymous identifier so submissions connect over time. true/false."
+    required: false
+    default: "false"
+  fail-on-unrecorded:
+    description: "Watch mode only: exit 1 when the PR was merged without a review record. A policy choice for your repository; off by default."
+    required: false
+    default: "false"
+  token:
+    description: "GitHub token for API calls. Read-only use."
+    required: false
+    default: ${{ github.token }}
+
+runs:
+  using: "composite"
+  steps:
+    - uses: actions/setup-python@0b93645e9fea7318ecaed2b359559ac225c90a2b # v5.3.0
+      with:
+        python-version: "3.11"
+    - name: Run agent-pr-ledger
+      shell: bash
+      env:
+        GITHUB_TOKEN: ${{ inputs.token }}
+        A_REPO: ${{ inputs.repo }}
+        A_LIMIT: ${{ inputs.limit }}
+        A_LANG: ${{ inputs.lang }}
+        A_PR: ${{ inputs.pr }}
+        A_MODE: ${{ inputs.mode }}
+        A_LINK: ${{ inputs.link }}
+        A_FAIL: ${{ inputs.fail-on-unrecorded }}
+      run: |
+        set -euo pipefail
+        SRC="${{ github.action_path }}/src"
+        if [ -n "$A_PR" ]; then
+          FLAGS=""
+          [ "$A_FAIL" = "true" ] && FLAGS="--fail-on-unrecorded"
+          python3 "$SRC/watch.py" "$A_REPO" "$A_PR" --lang "$A_LANG" $FLAGS | tee ledger.txt
+        else
+          MODE=""
+          case "$A_MODE" in
+            none) MODE="" ;;
+            dry-run) MODE="--dry-run" ;;
+            preview) MODE="--preview" ;;
+            send) MODE="--send" ;;
+            *) echo "error: mode must be none, dry-run, preview or send" >&2; exit 2 ;;
+          esac
+          LINK=""
+          [ "$A_LINK" = "true" ] && LINK="--link"
+          python3 "$SRC/ledger.py" "$A_REPO" "$A_LIMIT" --lang "$A_LANG" $MODE $LINK | tee ledger.txt
+        fi
+        { echo '```'; cat ledger.txt; echo '```'; } >> "$GITHUB_STEP_SUMMARY"

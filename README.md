@@ -12,6 +12,16 @@ It does not rank repositories. It does not compare agents. It does not tell you 
 
 By default it sends nothing anywhere. There is an optional exchange — your counts for a place in the population — and it is off until you turn it on. See **What leaves your repository**.
 
+**Quick start** (nothing is sent anywhere; see *What leaves your repository*):
+
+```yaml
+permissions:
+  contents: read
+  pull-requests: read
+steps:
+  - uses: atelierfactory/agent-pr-ledger@v0.1
+```
+
 ---
 
 ## Definition v1.0
@@ -117,7 +127,7 @@ permissions:
 
 Hosts contacted: `api.github.com` always; the Actions token endpoint (`ACTIONS_ID_TOKEN_REQUEST_URL`, a `pipelines*.actions.githubusercontent.com` host) in `--send`, to mint the OIDC token; `ledger.atelierfactory.jp` in `--preview` and `--send`. The server, separately, fetches GitHub's public keys from `token.actions.githubusercontent.com` to check the signature. Redirects away from those hosts are refused before the request is followed, so credentials cannot be forwarded elsewhere.
 
-v0.1 is not a Marketplace Action. You copy a few readable scripts and a workflow into your own repository and pin them yourself. That is deliberate: a tool asking for your trust should not also ask you to run code you cannot read, from a supply chain you do not control.
+v0.1 is not listed on the GitHub Marketplace. You can reference it directly (`uses: atelierfactory/agent-pr-ledger@v0.1`, or pinned to a commit SHA) — see [`action.yml`](action.yml) — or copy the few readable scripts and a workflow into your own repository. Either way the code you run is short enough to read, and there is no supply chain behind it.
 
 ## Usage
 
