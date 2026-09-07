@@ -1,0 +1,46 @@
+# agent-pr-ledger
+
+> A ledger of agent-authored pull requests. It counts; it does not score. A GitHub Action (Python standard library only, read-only permissions) that answers one question about a repository: of the pull requests opened by coding agents (GitHub Copilot, Devin, OpenAI Codex, Cursor, Claude Code, Google Jules), how many were merged with a review record and how many without.
+
+Canonical name: agent-pr-ledger. Repository: https://github.com/atelierfactory/agent-pr-ledger. Public aggregate endpoint: https://ledger.atelierfactory.jp/v1/cohort/cohort_latest.json. License: MIT. Current version: 0.1. Definition version: 1.0.
+
+## Definition v1.0
+
+- Merged with a review record: someone other than the PR author, and not a bot, left a review or a comment before the merge timestamp.
+- Merged without a review record: no such record exists.
+- Not merged: closed without merging.
+- "No review record" does not mean "unreviewed". A review done inside the agent's own interface leaves no record on GitHub. The tool counts whether an auditable record exists, not whether a review happened.
+- Definitions are versioned; a change ships with a version bump and a migration note.
+
+## How agent PRs are identified
+
+1. Author account (certain): Copilot, copilot-swe-agent[bot], devin-ai-integration[bot], devin[bot], google-labs-jules[bot].
+2. Branch prefix (inferred): codex/, cursor/, claude/, jules/, devin/.
+3. Body signature (inferred): "Generated with Claude Code", "Co-authored-by: Claude", "OpenAI Codex", "Generated with Cursor".
+4. Unattributable agent traces are reported as `trace` and excluded from counts. PRs with no trace are out of scope.
+
+Measured 2026-09-06 against AIDev labels: 355 of 355 labelled agent PRs identified (six agents); 9 of 157 unlabelled PRs from the same repositories flagged (upper bound 5.7%; 8 of the 9 carry Codex branch names and are more likely unlabelled agent PRs than human ones).
+
+## What it does not do
+
+- It does not rank repositories, compare agents, or give advice.
+- It does not post to PRs or issues; output goes to the Actions job summary.
+- It sends nothing anywhere by default. Sending aggregate counts is opt-in (`send: true` in the workflow file), authenticated with a GitHub OIDC token, public repositories only, repository name not stored.
+
+## Two modes
+
+- Ledger (`src/ledger.py OWNER/REPO 300`): monthly look-back over the most recent N pull requests. Text or `--json`.
+- Watch (`src/watch.py OWNER/REPO PR_NUMBER`): one pull request at the moment it closes (`pull_request: closed`). Exits 0 whatever it finds unless `--fail-on-unrecorded` is passed.
+
+## Files
+
+- README: https://github.com/atelierfactory/agent-pr-ledger/blob/main/README.md
+- Ledger workflow: https://github.com/atelierfactory/agent-pr-ledger/blob/main/.github/workflows/ledger.yml
+- Watch workflow: https://github.com/atelierfactory/agent-pr-ledger/blob/main/.github/workflows/watch.yml
+- Payload schema (what `send` transmits): https://github.com/atelierfactory/agent-pr-ledger/blob/main/server/schema.json
+- Detection validation script: https://github.com/atelierfactory/agent-pr-ledger/blob/main/tools/validate_detection.py
+- Citation: https://github.com/atelierfactory/agent-pr-ledger/blob/main/CITATION.cff
+
+## Background finding
+
+Across 490 public repositories with at least five merged agent PRs (AIDev dataset, 2024-12 to 2025-07), 41.6% merged every agent PR without a review record. The split follows posting identity, not agent brand: repositories where agent PRs arrive under a bot account almost always have records; repositories where they arrive under the developer's own account mostly do not. Merge rate and rework rate, the metrics commonly used to evaluate coding agents, mostly measure these posting conventions rather than agent quality.

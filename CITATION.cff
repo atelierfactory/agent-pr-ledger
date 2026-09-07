@@ -1,0 +1,20 @@
+cff-version: 1.2.0
+message: "If you use agent-pr-ledger or its definition v1.0, please cite it as below."
+title: "agent-pr-ledger: a ledger of agent-authored pull requests"
+abstract: "A read-only GitHub Action that counts, for one repository, how many pull requests opened by coding agents were merged with a human review record and how many without (definition v1.0). It counts; it does not score."
+type: software
+version: "0.1"
+date-released: "2026-09-06"
+license: MIT
+repository-code: "https://github.com/atelierfactory/agent-pr-ledger"
+url: "https://ledger.atelierfactory.jp"
+authors:
+  - name: "aTELiER FACTORY"
+    website: "https://atelierfactory.jp"
+keywords:
+  - coding agents
+  - pull requests
+  - code review
+  - audit trail
+  - GitHub Actions
+  - AI governance
