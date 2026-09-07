@@ -1,0 +1,103 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>agent-pr-ledger — a ledger of agent-authored pull requests</title>
+<meta name="description" content="agent-pr-ledger is a read-only GitHub Action that counts, for one repository, how many pull requests opened by coding agents were merged with a human review record and how many without (definition v1.0). It counts; it does not score.">
+<link rel="canonical" href="https://atelierfactory.github.io/agent-pr-ledger/">
+<link rel="alternate" type="text/plain" href="https://atelierfactory.github.io/agent-pr-ledger/llms.txt" title="llms.txt">
+<meta name="robots" content="index, follow, max-snippet:-1">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "SoftwareSourceCode",
+      "@id": "https://github.com/atelierfactory/agent-pr-ledger",
+      "name": "agent-pr-ledger",
+      "alternateName": "Agent PR ledger",
+      "description": "A ledger of agent-authored pull requests. A read-only GitHub Action that counts, for one repository, how many pull requests opened by coding agents (GitHub Copilot, Devin, OpenAI Codex, Cursor, Claude Code, Google Jules) were merged with a human review record and how many without (definition v1.0). It counts; it does not score.",
+      "codeRepository": "https://github.com/atelierfactory/agent-pr-ledger",
+      "url": "https://atelierfactory.github.io/agent-pr-ledger/",
+      "programmingLanguage": "Python",
+      "runtimePlatform": "GitHub Actions",
+      "license": "https://opensource.org/licenses/MIT",
+      "version": "0.1",
+      "datePublished": "2026-09-05",
+      "author": {"@type": "Organization", "name": "aTELiER FACTORY", "url": "https://atelierfactory.jp"},
+      "keywords": ["coding agents", "pull requests", "code review", "audit trail", "GitHub Actions", "AI governance", "Copilot", "Devin", "Codex", "Cursor", "Claude Code", "Jules"],
+      "isAccessibleForFree": true
+    },
+    {
+      "@type": "Dataset",
+      "@id": "https://ledger.atelierfactory.jp/v1/cohort/cohort_latest.json",
+      "name": "agent-pr-ledger population aggregates",
+      "description": "Distribution of the share of agent-authored pull requests merged without a human review record across 490 public repositories with at least five merged agent PRs, split by posting identity (bot account vs developer's own account). Derived from AIDev. Contains no repository names.",
+      "url": "https://ledger.atelierfactory.jp/v1/cohort/cohort_latest.json",
+      "license": "https://opensource.org/licenses/MIT",
+      "isAccessibleForFree": true,
+      "creator": {"@type": "Organization", "name": "aTELiER FACTORY"},
+      "isBasedOn": "https://huggingface.co/datasets/hao-li/AIDev",
+      "distribution": {"@type": "DataDownload", "encodingFormat": "application/json", "contentUrl": "https://ledger.atelierfactory.jp/v1/cohort/cohort_latest.json"}
+    },
+    {
+      "@type": "DefinedTerm",
+      "name": "review record (agent-pr-ledger definition v1.0)",
+      "description": "A merged pull request carries a review record if someone other than the PR author, and not a bot, left a review or a comment before the merge timestamp. 'No review record' does not mean 'unreviewed': a review inside the agent's own interface leaves no record on GitHub.",
+      "inDefinedTermSet": "https://github.com/atelierfactory/agent-pr-ledger/blob/main/README.md#definition-v10"
+    }
+  ]
+}
+</script>
+<style>
+body{margin:0;background:#fff;color:#1a1a1a;font:16px/1.6 -apple-system,Segoe UI,Helvetica,Arial,sans-serif}
+main{max-width:46rem;margin:0 auto;padding:3rem 1.25rem}
+h1{font-size:1.75rem;margin:0 0 .25rem}h2{font-size:1.15rem;margin:2rem 0 .5rem}
+p.lead{font-size:1.1rem}code,pre{font:.9rem/1.5 ui-monospace,SFMono-Regular,Menlo,monospace}
+pre{background:#f4f4f4;padding:.75rem 1rem;overflow-x:auto;border-radius:4px}
+table{border-collapse:collapse;width:100%}td,th{border-bottom:1px solid #ddd;padding:.4rem .5rem;text-align:left;vertical-align:top}
+a{color:#0b57d0}footer{margin-top:3rem;color:#666;font-size:.9rem}
+@media (prefers-color-scheme:dark){body{background:#111;color:#e8e8e8}pre{background:#1e1e1e}td,th{border-color:#333}a{color:#8ab4f8}footer{color:#999}}
+</style>
+</head>
+<body>
+<main>
+<h1>agent-pr-ledger</h1>
+<p class="lead"><strong>A ledger of agent-authored pull requests. It counts; it does not score.</strong></p>
+<p>A read-only GitHub Action that answers one question about a repository: of the pull requests opened by coding agents (GitHub Copilot, Devin, OpenAI Codex, Cursor, Claude Code, Google Jules), how many were merged <strong>with a human review record</strong> and how many <strong>without</strong>.</p>
+
+<h2>Definition v1.0</h2>
+<table>
+<tr><th>Outcome</th><th>Condition</th></tr>
+<tr><td>Merged with a review record</td><td>Someone other than the PR author, and not a bot, left a review or a comment before the merge timestamp</td></tr>
+<tr><td>Merged without a review record</td><td>No such record exists</td></tr>
+<tr><td>Not merged</td><td>Closed without merging</td></tr>
+</table>
+<p>"No review record" does not mean "unreviewed". A review done inside the agent's own interface leaves no record on GitHub. The tool counts whether an <em>auditable</em> record exists.</p>
+
+<h2>Use it</h2>
+<pre><code>permissions:
+  contents: read
+  pull-requests: read
+steps:
+  - uses: atelierfactory/agent-pr-ledger@v0.1</code></pre>
+<p>Nothing is sent anywhere by default. Sending aggregate counts (no repository name) is opt-in and recorded as a line in your own workflow file.</p>
+
+<h2>What the population looks like</h2>
+<p>Across 490 public repositories with at least five merged agent PRs (AIDev, 2024-12 to 2025-07), 41.6% merged every agent PR without a review record. The split follows posting identity, not agent brand: 1.7% of repositories where agent PRs arrive under a bot account have no records at all; 63.3% of repositories where they arrive under the developer's own account do.</p>
+
+<h2>Files for machines</h2>
+<ul>
+<li><a href="https://github.com/atelierfactory/agent-pr-ledger">Repository</a> (canonical)</li>
+<li><a href="llms.txt">llms.txt</a> — machine-readable summary</li>
+<li><a href="https://github.com/atelierfactory/agent-pr-ledger/blob/main/CITATION.cff">CITATION.cff</a></li>
+<li><a href="https://github.com/atelierfactory/agent-pr-ledger/blob/main/AGENTS.md">AGENTS.md</a> — instructions for coding agents</li>
+<li><a href="https://github.com/atelierfactory/agent-pr-ledger/blob/main/action.yml">action.yml</a></li>
+<li><a href="https://ledger.atelierfactory.jp/v1/cohort/cohort_latest.json">Population aggregates (JSON)</a></li>
+<li><a href="https://github.com/atelierfactory/agent-pr-ledger/releases/tag/v0.1">Release v0.1</a></li>
+</ul>
+<footer>aTELiER FACTORY · MIT License · Definitions are versioned; a change ships with a version bump and a migration note.</footer>
+</main>
+</body>
+</html>

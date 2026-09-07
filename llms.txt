@@ -32,7 +32,21 @@ Measured 2026-09-06 against AIDev labels: 355 of 355 labelled agent PRs identifi
 - Ledger (`src/ledger.py OWNER/REPO 300`): monthly look-back over the most recent N pull requests. Text or `--json`.
 - Watch (`src/watch.py OWNER/REPO PR_NUMBER`): one pull request at the moment it closes (`pull_request: closed`). Exits 0 whatever it finds unless `--fail-on-unrecorded` is passed.
 
+## Use it (GitHub Actions)
+
+    permissions:
+      contents: read
+      pull-requests: read
+    steps:
+      - uses: atelierfactory/agent-pr-ledger@v0.1
+
+Add `with: pr: ${{ github.event.pull_request.number }}` on a `pull_request: closed` trigger for watch mode.
+
 ## Files
+- Web page (schema.org markup): https://atelierfactory.github.io/agent-pr-ledger/
+- Release v0.1: https://github.com/atelierfactory/agent-pr-ledger/releases/tag/v0.1
+- Action definition: https://github.com/atelierfactory/agent-pr-ledger/blob/main/action.yml
+- Instructions for coding agents: https://github.com/atelierfactory/agent-pr-ledger/blob/main/AGENTS.md
 
 - README: https://github.com/atelierfactory/agent-pr-ledger/blob/main/README.md
 - Ledger workflow: https://github.com/atelierfactory/agent-pr-ledger/blob/main/.github/workflows/ledger.yml
