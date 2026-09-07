@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>How well the tool identifies agent PRs (measured 2026-09-06) — agent-pr-ledger</title>
+<meta name="description" content="355 of 355 AIDev-labelled agent PRs across six agents identified; 9 of 157 unlabelled PRs from the same repositories flagged, an upper bound of 5.7% that is mostly unlabelled Codex PRs.">
+<link rel="canonical" href="https://atelierfactory.github.io/agent-pr-ledger/findings/detection-accuracy/"><meta name="robots" content="index, follow, max-snippet:-1">
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "Article", "headline": "How well the tool identifies agent PRs (measured 2026-09-06)", "description": "355 of 355 AIDev-labelled agent PRs across six agents identified; 9 of 157 unlabelled PRs from the same repositories flagged, an upper bound of 5.7% that is mostly unlabelled Codex PRs.", "url": "https://atelierfactory.github.io/agent-pr-ledger/findings/detection-accuracy/", "datePublished": "2026-09-08", "dateModified": "2026-09-08", "author": {"@type": "Organization", "name": "aTELiER FACTORY", "url": "https://atelierfactory.jp"}, "publisher": {"@type": "Organization", "name": "aTELiER FACTORY"}, "isPartOf": {"@type": "WebSite", "name": "agent-pr-ledger", "url": "https://atelierfactory.github.io/agent-pr-ledger/"}, "about": {"@type": "SoftwareSourceCode", "name": "agent-pr-ledger", "codeRepository": "https://github.com/atelierfactory/agent-pr-ledger"}, "keywords": ["coding agents", "pull requests", "code review", "agent-pr-ledger", "definition v1.0"]}</script>
+<style>body{margin:0;background:#fff;color:#1a1a1a;font:16px/1.6 -apple-system,Segoe UI,Helvetica,Arial,sans-serif}
+main{max-width:46rem;margin:0 auto;padding:2.5rem 1.25rem}nav{font-size:.9rem;color:#666}
+h1{font-size:1.6rem;margin:.5rem 0 .25rem}h2{font-size:1.15rem;margin:1.75rem 0 .5rem}
+p.lead{font-size:1.05rem}table{border-collapse:collapse;width:100%;margin:.5rem 0}
+td,th{border-bottom:1px solid #ddd;padding:.35rem .5rem;text-align:left;vertical-align:top}
+a{color:#0b57d0}footer{margin-top:2.5rem;color:#666;font-size:.9rem}aside{border-left:3px solid #ccc;padding:.25rem .75rem;color:#444;margin:1rem 0}
+@media (prefers-color-scheme:dark){body{background:#111;color:#e8e8e8}td,th{border-color:#333}a{color:#8ab4f8}footer,nav{color:#999}aside{color:#bbb;border-color:#444}}</style></head>
+<body><main>
+<nav><a href="../../">agent-pr-ledger</a> · <a href="../">findings</a></nav>
+<h1>How well the tool identifies agent PRs (measured 2026-09-06)</h1>
+<p><em>355 of 355 AIDev-labelled agent PRs across six agents identified; 9 of 157 unlabelled PRs from the same repositories flagged, an upper bound of 5.7% that is mostly unlabelled Codex PRs.</em></p>
+
+<p class="lead">agent-pr-ledger identifies agent PRs by three signals, in order: author account (certain), branch prefix (inferred), body signature (inferred). The output always states which one was used. We measured the rules against AIDev labels.</p>
+<table><tr><th>Agent (AIDev label)</th><th>Sampled</th><th>Identified</th><th>Name matched</th><th>Signal</th></tr>
+<tr><td>GitHub Copilot</td><td>60</td><td>60</td><td>60</td><td>author</td></tr>
+<tr><td>Devin</td><td>60</td><td>60</td><td>60</td><td>author</td></tr>
+<tr><td>Google Jules</td><td>59</td><td>59</td><td>59</td><td>author (after fix)</td></tr>
+<tr><td>OpenAI Codex</td><td>60</td><td>60</td><td>60</td><td>branch</td></tr>
+<tr><td>Cursor</td><td>59</td><td>59</td><td>59</td><td>branch</td></tr>
+<tr><td>Claude Code</td><td>57</td><td>57</td><td>57</td><td>branch / body</td></tr></table>
+<p>One PR per repository per agent, so no single account dominates. Before the fix, Jules scored 0 of 59: its bot account was missing from the name table. The fix is one line; the lesson is that a rule marked "certain" must be exercised against every agent it claims to cover.</p>
+<p><strong>False positives.</strong> Of 157 PRs from the same repositories, inside AIDev's window, that AIDev does not label, 9 were flagged as agent-authored: an upper bound of 5.7%. Eight of the nine carry <code>codex/</code> branch names and are more plausibly agent PRs the dataset missed than human coincidences; one is a human PR with a Claude co-author trailer (0.6%). AIDev labels presence, not absence, so the figure is an upper bound.</p>
+<p>Script: <a href="https://github.com/atelierfactory/agent-pr-ledger/blob/main/tools/validate_detection.py">tools/validate_detection.py</a>.</p>
+
+<aside>Data: AIDev (Hugging Face <code>hao-li/AIDev</code>), curated subset of 33,596 agent-authored pull requests, 2024-12 to 2025-07, five agents. Figures are as computed on that snapshot; the dataset has since grown. Full write-up: forthcoming.</aside>
+<footer>agent-pr-ledger — a ledger of agent-authored pull requests. It counts; it does not score. <a href="https://github.com/atelierfactory/agent-pr-ledger">Repository</a> · <a href="https://atelierfactory.github.io/agent-pr-ledger/llms.txt">llms.txt</a> · <a href="https://github.com/atelierfactory/agent-pr-ledger/blob/main/CITATION.cff">Cite</a></footer>
+</main></body></html>

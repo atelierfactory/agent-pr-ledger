@@ -2,4 +2,13 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url><loc>https://atelierfactory.github.io/agent-pr-ledger/</loc><lastmod>2026-09-08</lastmod><changefreq>monthly</changefreq></url>
   <url><loc>https://atelierfactory.github.io/agent-pr-ledger/llms.txt</loc><lastmod>2026-09-08</lastmod><changefreq>monthly</changefreq></url>
+  <url><loc>https://atelierfactory.github.io/agent-pr-ledger/findings/</loc><lastmod>2026-09-08</lastmod><changefreq>monthly</changefreq></url>
+  <url><loc>https://atelierfactory.github.io/agent-pr-ledger/findings/merge-rate-measures-conventions/</loc><lastmod>2026-09-08</lastmod><changefreq>monthly</changefreq></url>
+  <url><loc>https://atelierfactory.github.io/agent-pr-ledger/findings/rework-rate-measures-commit-conventions/</loc><lastmod>2026-09-08</lastmod><changefreq>monthly</changefreq></url>
+  <url><loc>https://atelierfactory.github.io/agent-pr-ledger/findings/threshold-free-self-merge-still-breaks/</loc><lastmod>2026-09-08</lastmod><changefreq>monthly</changefreq></url>
+  <url><loc>https://atelierfactory.github.io/agent-pr-ledger/findings/definition-v1-review-record/</loc><lastmod>2026-09-08</lastmod><changefreq>monthly</changefreq></url>
+  <url><loc>https://atelierfactory.github.io/agent-pr-ledger/findings/posting-identity-not-brand/</loc><lastmod>2026-09-08</lastmod><changefreq>monthly</changefreq></url>
+  <url><loc>https://atelierfactory.github.io/agent-pr-ledger/findings/same-event-two-stories/</loc><lastmod>2026-09-08</lastmod><changefreq>monthly</changefreq></url>
+  <url><loc>https://atelierfactory.github.io/agent-pr-ledger/findings/readiness-scores-null-result/</loc><lastmod>2026-09-08</lastmod><changefreq>monthly</changefreq></url>
+  <url><loc>https://atelierfactory.github.io/agent-pr-ledger/findings/detection-accuracy/</loc><lastmod>2026-09-08</lastmod><changefreq>monthly</changefreq></url>
 </urlset>

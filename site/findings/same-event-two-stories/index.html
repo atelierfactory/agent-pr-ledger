@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>The same event, two opposite stories — agent-pr-ledger</title>
+<meta name="description" content="After repositories adopt an agent instruction file, merge rate falls 16 points. Decomposed, the whole fall is the disappearance of unrecorded merges; recorded merges do not move.">
+<link rel="canonical" href="https://atelierfactory.github.io/agent-pr-ledger/findings/same-event-two-stories/"><meta name="robots" content="index, follow, max-snippet:-1">
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "Article", "headline": "The same event, two opposite stories", "description": "After repositories adopt an agent instruction file, merge rate falls 16 points. Decomposed, the whole fall is the disappearance of unrecorded merges; recorded merges do not move.", "url": "https://atelierfactory.github.io/agent-pr-ledger/findings/same-event-two-stories/", "datePublished": "2026-09-08", "dateModified": "2026-09-08", "author": {"@type": "Organization", "name": "aTELiER FACTORY", "url": "https://atelierfactory.jp"}, "publisher": {"@type": "Organization", "name": "aTELiER FACTORY"}, "isPartOf": {"@type": "WebSite", "name": "agent-pr-ledger", "url": "https://atelierfactory.github.io/agent-pr-ledger/"}, "about": {"@type": "SoftwareSourceCode", "name": "agent-pr-ledger", "codeRepository": "https://github.com/atelierfactory/agent-pr-ledger"}, "keywords": ["coding agents", "pull requests", "code review", "agent-pr-ledger", "definition v1.0"]}</script>
+<style>body{margin:0;background:#fff;color:#1a1a1a;font:16px/1.6 -apple-system,Segoe UI,Helvetica,Arial,sans-serif}
+main{max-width:46rem;margin:0 auto;padding:2.5rem 1.25rem}nav{font-size:.9rem;color:#666}
+h1{font-size:1.6rem;margin:.5rem 0 .25rem}h2{font-size:1.15rem;margin:1.75rem 0 .5rem}
+p.lead{font-size:1.05rem}table{border-collapse:collapse;width:100%;margin:.5rem 0}
+td,th{border-bottom:1px solid #ddd;padding:.35rem .5rem;text-align:left;vertical-align:top}
+a{color:#0b57d0}footer{margin-top:2.5rem;color:#666;font-size:.9rem}aside{border-left:3px solid #ccc;padding:.25rem .75rem;color:#444;margin:1rem 0}
+@media (prefers-color-scheme:dark){body{background:#111;color:#e8e8e8}td,th{border-color:#333}a{color:#8ab4f8}footer,nav{color:#999}aside{color:#bbb;border-color:#444}}</style></head>
+<body><main>
+<nav><a href="../../">agent-pr-ledger</a> · <a href="../">findings</a></nav>
+<h1>The same event, two opposite stories</h1>
+<p><em>After repositories adopt an agent instruction file, merge rate falls 16 points. Decomposed, the whole fall is the disappearance of unrecorded merges; recorded merges do not move.</em></p>
+
+<p class="lead">221 repositories adopted an agent instruction file (AGENTS.md, CLAUDE.md and similar) during the window; 155 never did. Repository fixed effects, agent × calendar-month fixed effects, standard errors clustered by repository, relative-month dummies with the month before adoption as reference.</p>
+<table><tr><th>Relative month</th><th>−4</th><th>−3</th><th>−2</th><th>0</th><th>+1</th><th>+2</th><th>+3</th></tr>
+<tr><td>Merge rate (common metric)</td><td>+0.023</td><td>−0.006</td><td>−0.022</td><td><b>−0.119</b></td><td><b>−0.165</b></td><td><b>−0.163</b></td><td>−0.162</td></tr>
+<tr><td>Merged <b>without</b> review record</td><td>−0.012</td><td>−0.026</td><td>−0.020</td><td><b>−0.115</b></td><td><b>−0.159</b></td><td><b>−0.176</b></td><td><b>−0.235</b></td></tr>
+<tr><td>Merged <b>with</b> review record</td><td>+0.035</td><td>+0.020</td><td>−0.002</td><td>−0.004</td><td>−0.006</td><td>+0.013</td><td>+0.073</td></tr></table>
+<p>Bold: p &lt; 0.05. Pre-adoption coefficients are zero for all three outcomes (parallel trends hold for these three; not for rework rate, on which we make no causal claim).</p>
+<p><strong>Under merge rate:</strong> adoption is followed by a persistent 16-point decline. Read naively, instruction files made agents worse.</p>
+<p><strong>Under the decomposition:</strong> the decline is entirely the disappearance of merges without a review record, deepening from −0.115 to −0.235, while merges with a review record do not move in any period (p &gt; 0.28). The team began to manage agent intake. In the adoption month, CI configuration files are also added at 3.5 times the usual pace, and change-request rate rises in the month <em>before</em> adoption: files are added in response to friction, not ahead of it.</p>
+<p>Same data, same months, same repositories. The definition decides which story you tell. This is the reason agent-pr-ledger exists.</p>
+<p><strong>Definition v1.0 (agent-pr-ledger).</strong> A merged pull request carries a <em>review record</em> if someone other than the PR author, and not a bot, left a review or a comment before the merge timestamp. "No review record" does not mean "unreviewed": a review inside the agent's own interface leaves no record on GitHub. The tool counts whether an auditable record exists.</p>
+<aside>Data: AIDev (Hugging Face <code>hao-li/AIDev</code>), curated subset of 33,596 agent-authored pull requests, 2024-12 to 2025-07, five agents. Figures are as computed on that snapshot; the dataset has since grown. Full write-up: forthcoming.</aside>
+<footer>agent-pr-ledger — a ledger of agent-authored pull requests. It counts; it does not score. <a href="https://github.com/atelierfactory/agent-pr-ledger">Repository</a> · <a href="https://atelierfactory.github.io/agent-pr-ledger/llms.txt">llms.txt</a> · <a href="https://github.com/atelierfactory/agent-pr-ledger/blob/main/CITATION.cff">Cite</a></footer>
+</main></body></html>

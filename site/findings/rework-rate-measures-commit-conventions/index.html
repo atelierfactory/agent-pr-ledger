@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Rework rate measures commit conventions — agent-pr-ledger</title>
+<meta name="description" content="The share of PRs with two or more commits is 0.132 for Codex and 0.899 for Copilot. Agent mix explains 76% of between-repository variance.">
+<link rel="canonical" href="https://atelierfactory.github.io/agent-pr-ledger/findings/rework-rate-measures-commit-conventions/"><meta name="robots" content="index, follow, max-snippet:-1">
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "Article", "headline": "Rework rate measures commit conventions", "description": "The share of PRs with two or more commits is 0.132 for Codex and 0.899 for Copilot. Agent mix explains 76% of between-repository variance.", "url": "https://atelierfactory.github.io/agent-pr-ledger/findings/rework-rate-measures-commit-conventions/", "datePublished": "2026-09-08", "dateModified": "2026-09-08", "author": {"@type": "Organization", "name": "aTELiER FACTORY", "url": "https://atelierfactory.jp"}, "publisher": {"@type": "Organization", "name": "aTELiER FACTORY"}, "isPartOf": {"@type": "WebSite", "name": "agent-pr-ledger", "url": "https://atelierfactory.github.io/agent-pr-ledger/"}, "about": {"@type": "SoftwareSourceCode", "name": "agent-pr-ledger", "codeRepository": "https://github.com/atelierfactory/agent-pr-ledger"}, "keywords": ["coding agents", "pull requests", "code review", "agent-pr-ledger", "definition v1.0"]}</script>
+<style>body{margin:0;background:#fff;color:#1a1a1a;font:16px/1.6 -apple-system,Segoe UI,Helvetica,Arial,sans-serif}
+main{max-width:46rem;margin:0 auto;padding:2.5rem 1.25rem}nav{font-size:.9rem;color:#666}
+h1{font-size:1.6rem;margin:.5rem 0 .25rem}h2{font-size:1.15rem;margin:1.75rem 0 .5rem}
+p.lead{font-size:1.05rem}table{border-collapse:collapse;width:100%;margin:.5rem 0}
+td,th{border-bottom:1px solid #ddd;padding:.35rem .5rem;text-align:left;vertical-align:top}
+a{color:#0b57d0}footer{margin-top:2.5rem;color:#666;font-size:.9rem}aside{border-left:3px solid #ccc;padding:.25rem .75rem;color:#444;margin:1rem 0}
+@media (prefers-color-scheme:dark){body{background:#111;color:#e8e8e8}td,th{border-color:#333}a{color:#8ab4f8}footer,nav{color:#999}aside{color:#bbb;border-color:#444}}</style></head>
+<body><main>
+<nav><a href="../../">agent-pr-ledger</a> · <a href="../">findings</a></nav>
+<h1>Rework rate measures commit conventions</h1>
+<p><em>The share of PRs with two or more commits is 0.132 for Codex and 0.899 for Copilot. Agent mix explains 76% of between-repository variance.</em></p>
+
+<p class="lead">"Rework" is often measured as the share of pull requests that needed more than one commit. Codex produces one commit per PR by design (mean 1.49); Copilot averages 4.79. The metric measures that design choice.</p>
+<p>Regressing each repository's rework rate on its agent mix alone gives R² = 0.762. Three-quarters of what looks like repository-level variation is which agent the repository uses.</p>
+<p>We measured this contamination for six candidate outcomes (R² on agent composition; lower is better):</p>
+<table><tr><th>Outcome</th><th>R² on agent mix</th></tr>
+<tr><td>Change-request rate, human-touched PRs only</td><td>0.126</td></tr>
+<tr><td>Change-request rate, all PRs</td><td>0.265</td></tr>
+<tr><td>Approval rate</td><td>0.390</td></tr>
+<tr><td>Merge rate</td><td>0.415</td></tr>
+<tr><td>Human-touched share</td><td>0.551</td></tr>
+<tr><td>Rework rate</td><td>0.762</td></tr></table>
+<p>Rule we adopted: before using any outcome, check how much of it agent composition already explains. If the answer is most of it, the metric is measuring the agents' habits.</p>
+
+<aside>Data: AIDev (Hugging Face <code>hao-li/AIDev</code>), curated subset of 33,596 agent-authored pull requests, 2024-12 to 2025-07, five agents. Figures are as computed on that snapshot; the dataset has since grown. Full write-up: forthcoming.</aside>
+<footer>agent-pr-ledger — a ledger of agent-authored pull requests. It counts; it does not score. <a href="https://github.com/atelierfactory/agent-pr-ledger">Repository</a> · <a href="https://atelierfactory.github.io/agent-pr-ledger/llms.txt">llms.txt</a> · <a href="https://github.com/atelierfactory/agent-pr-ledger/blob/main/CITATION.cff">Cite</a></footer>
+</main></body></html>

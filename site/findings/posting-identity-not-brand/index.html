@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>The dividing line is posting identity, not agent brand — agent-pr-ledger</title>
+<meta name="description" content="1.7% of repositories where agent PRs arrive under a bot account have no review records at all. 63.3% of repositories where they arrive under the developer&#x27;s own account do.">
+<link rel="canonical" href="https://atelierfactory.github.io/agent-pr-ledger/findings/posting-identity-not-brand/"><meta name="robots" content="index, follow, max-snippet:-1">
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "Article", "headline": "The dividing line is posting identity, not agent brand", "description": "1.7% of repositories where agent PRs arrive under a bot account have no review records at all. 63.3% of repositories where they arrive under the developer's own account do.", "url": "https://atelierfactory.github.io/agent-pr-ledger/findings/posting-identity-not-brand/", "datePublished": "2026-09-08", "dateModified": "2026-09-08", "author": {"@type": "Organization", "name": "aTELiER FACTORY", "url": "https://atelierfactory.jp"}, "publisher": {"@type": "Organization", "name": "aTELiER FACTORY"}, "isPartOf": {"@type": "WebSite", "name": "agent-pr-ledger", "url": "https://atelierfactory.github.io/agent-pr-ledger/"}, "about": {"@type": "SoftwareSourceCode", "name": "agent-pr-ledger", "codeRepository": "https://github.com/atelierfactory/agent-pr-ledger"}, "keywords": ["coding agents", "pull requests", "code review", "agent-pr-ledger", "definition v1.0"]}</script>
+<style>body{margin:0;background:#fff;color:#1a1a1a;font:16px/1.6 -apple-system,Segoe UI,Helvetica,Arial,sans-serif}
+main{max-width:46rem;margin:0 auto;padding:2.5rem 1.25rem}nav{font-size:.9rem;color:#666}
+h1{font-size:1.6rem;margin:.5rem 0 .25rem}h2{font-size:1.15rem;margin:1.75rem 0 .5rem}
+p.lead{font-size:1.05rem}table{border-collapse:collapse;width:100%;margin:.5rem 0}
+td,th{border-bottom:1px solid #ddd;padding:.35rem .5rem;text-align:left;vertical-align:top}
+a{color:#0b57d0}footer{margin-top:2.5rem;color:#666;font-size:.9rem}aside{border-left:3px solid #ccc;padding:.25rem .75rem;color:#444;margin:1rem 0}
+@media (prefers-color-scheme:dark){body{background:#111;color:#e8e8e8}td,th{border-color:#333}a{color:#8ab4f8}footer,nav{color:#999}aside{color:#bbb;border-color:#444}}</style></head>
+<body><main>
+<nav><a href="../../">agent-pr-ledger</a> · <a href="../">findings</a></nav>
+<h1>The dividing line is posting identity, not agent brand</h1>
+<p><em>1.7% of repositories where agent PRs arrive under a bot account have no review records at all. 63.3% of repositories where they arrive under the developer&#x27;s own account do.</em></p>
+
+<p class="lead">Among 490 public repositories with at least five merged agent PRs, 41.6% merged every agent PR without a review record. What separates them is not which agent they use.</p>
+<table><tr><th>Cut-off (merged agent PRs)</th><th>Repositories</th><th>Median recorded share</th><th>No records at all</th></tr>
+<tr><td>≥ 3</td><td>762</td><td>0.250</td><td>41.9%</td></tr>
+<tr><td>≥ 5</td><td>490</td><td>0.190</td><td>41.6%</td></tr>
+<tr><td>≥ 10</td><td>252</td><td>0.165</td><td>38.1%</td></tr>
+<tr><td>≥ 20</td><td>130</td><td>0.087</td><td>38.5%</td></tr>
+<tr><td>≥ 30</td><td>86</td><td>0.073</td><td>36.0%</td></tr></table>
+<p>Assigning each repository to the identity type that accounts for more than half of its merged agent PRs (n = 490):</p>
+<table><tr><th>Identity type</th><th>Repositories</th><th>Median unrecorded share</th><th>No records at all</th></tr>
+<tr><td>Bot account (external contribution: Copilot, Devin)</td><td>173</td><td>0.078</td><td>1.7%</td></tr>
+<tr><td>Developer's own account (own work: Codex, Cursor, Claude Code)</td><td>316</td><td>1.000</td><td>63.3%</td></tr></table>
+<p>When agent PRs arrive as external contributions, a review record almost always exists. When they arrive as the developer's own work, two-thirds of repositories have none. Identity type explains 48.2% of between-repository variance (PR-weighted), 88% of what brand explains. Brand is a proxy for identity type.</p>
+<p>This is why agent-pr-ledger never compares agents and always reports the identity type of the repository it is looking at.</p>
+
+<aside>Data: AIDev (Hugging Face <code>hao-li/AIDev</code>), curated subset of 33,596 agent-authored pull requests, 2024-12 to 2025-07, five agents. Figures are as computed on that snapshot; the dataset has since grown. Full write-up: forthcoming.</aside>
+<footer>agent-pr-ledger — a ledger of agent-authored pull requests. It counts; it does not score. <a href="https://github.com/atelierfactory/agent-pr-ledger">Repository</a> · <a href="https://atelierfactory.github.io/agent-pr-ledger/llms.txt">llms.txt</a> · <a href="https://github.com/atelierfactory/agent-pr-ledger/blob/main/CITATION.cff">Cite</a></footer>
+</main></body></html>

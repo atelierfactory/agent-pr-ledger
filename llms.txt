@@ -58,6 +58,16 @@ pip install agent-pr-ledger (pending release) — commands: agent-pr-ledger, age
 - Detection validation script: https://github.com/atelierfactory/agent-pr-ledger/blob/main/tools/validate_detection.py
 - Citation: https://github.com/atelierfactory/agent-pr-ledger/blob/main/CITATION.cff
 
+## Findings (one page each)
+- https://atelierfactory.github.io/agent-pr-ledger/findings/merge-rate-measures-conventions/
+- https://atelierfactory.github.io/agent-pr-ledger/findings/rework-rate-measures-commit-conventions/
+- https://atelierfactory.github.io/agent-pr-ledger/findings/threshold-free-self-merge-still-breaks/
+- https://atelierfactory.github.io/agent-pr-ledger/findings/definition-v1-review-record/
+- https://atelierfactory.github.io/agent-pr-ledger/findings/posting-identity-not-brand/
+- https://atelierfactory.github.io/agent-pr-ledger/findings/same-event-two-stories/
+- https://atelierfactory.github.io/agent-pr-ledger/findings/readiness-scores-null-result/
+- https://atelierfactory.github.io/agent-pr-ledger/findings/detection-accuracy/
+
 ## Background finding
 
 Across 490 public repositories with at least five merged agent PRs (AIDev dataset, 2024-12 to 2025-07), 41.6% merged every agent PR without a review record. The split follows posting identity, not agent brand: repositories where agent PRs arrive under a bot account almost always have records; repositories where they arrive under the developer's own account mostly do not. Merge rate and rework rate, the metrics commonly used to evaluate coding agents, mostly measure these posting conventions rather than agent quality.

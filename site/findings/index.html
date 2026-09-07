@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Findings — agent-pr-ledger</title>
+<meta name="description" content="What 33,596 agent-authored pull requests show about the metrics used to evaluate coding agents, and the definition agent-pr-ledger uses instead.">
+<link rel="canonical" href="https://atelierfactory.github.io/agent-pr-ledger/findings/"><meta name="robots" content="index, follow, max-snippet:-1">
+<style>body{margin:0;background:#fff;color:#1a1a1a;font:16px/1.6 -apple-system,Segoe UI,Helvetica,Arial,sans-serif}
+main{max-width:46rem;margin:0 auto;padding:2.5rem 1.25rem}nav{font-size:.9rem;color:#666}
+h1{font-size:1.6rem;margin:.5rem 0 .25rem}h2{font-size:1.15rem;margin:1.75rem 0 .5rem}
+p.lead{font-size:1.05rem}table{border-collapse:collapse;width:100%;margin:.5rem 0}
+td,th{border-bottom:1px solid #ddd;padding:.35rem .5rem;text-align:left;vertical-align:top}
+a{color:#0b57d0}footer{margin-top:2.5rem;color:#666;font-size:.9rem}aside{border-left:3px solid #ccc;padding:.25rem .75rem;color:#444;margin:1rem 0}
+@media (prefers-color-scheme:dark){body{background:#111;color:#e8e8e8}td,th{border-color:#333}a{color:#8ab4f8}footer,nav{color:#999}aside{color:#bbb;border-color:#444}} li{margin:.75rem 0} li span{color:#555}</style></head>
+<body><main>
+<nav><a href="../">agent-pr-ledger</a></nav>
+<h1>Findings</h1>
+<p class="lead">What 33,596 agent-authored pull requests show about the metrics commonly used to evaluate coding agents, and the definition agent-pr-ledger uses instead. One finding per page.</p>
+<ul><li><a href="merge-rate-measures-conventions/">Merge rate measures who presses the button, not agent quality</a><br><span>Median time to merge is 50 seconds for OpenAI Codex and 17.7 hours for GitHub Copilot. The difference is posting identity, not quality.</span></li>
+<li><a href="rework-rate-measures-commit-conventions/">Rework rate measures commit conventions</a><br><span>The share of PRs with two or more commits is 0.132 for Codex and 0.899 for Copilot. Agent mix explains 76% of between-repository variance.</span></li>
+<li><a href="threshold-free-self-merge-still-breaks/">A threshold-free self-merge definition still breaks</a><br><span>&#x27;Merger ≠ author&#x27; gives self-merge rates of 0.98 for Codex and 0.00 for Copilot, because one posts as the user and the other as a bot.</span></li>
+<li><a href="definition-v1-review-record/">Definition v1.0: a review record, not a review</a><br><span>agent-pr-ledger counts whether an auditable record of review exists before the merge. It does not claim to know whether anyone looked.</span></li>
+<li><a href="posting-identity-not-brand/">The dividing line is posting identity, not agent brand</a><br><span>1.7% of repositories where agent PRs arrive under a bot account have no review records at all. 63.3% of repositories where they arrive under the developer&#x27;s own account do.</span></li>
+<li><a href="same-event-two-stories/">The same event, two opposite stories</a><br><span>After repositories adopt an agent instruction file, merge rate falls 16 points. Decomposed, the whole fall is the disappearance of unrecorded merges; recorded merges do not move.</span></li>
+<li><a href="readiness-scores-null-result/">Repository &#x27;AI-readiness&#x27; scores mostly restate size, language and agent choice</a><br><span>24 structural features, harvested by rewinding each repository to the day before its first agent PR, add +0.005 to +0.024 AUC over what agent, task, size and language already give.</span></li>
+<li><a href="detection-accuracy/">How well the tool identifies agent PRs (measured 2026-09-06)</a><br><span>355 of 355 AIDev-labelled agent PRs across six agents identified; 9 of 157 unlabelled PRs from the same repositories flagged, an upper bound of 5.7% that is mostly unlabelled Codex PRs.</span></li></ul>
+<p><strong>Definition v1.0 (agent-pr-ledger).</strong> A merged pull request carries a <em>review record</em> if someone other than the PR author, and not a bot, left a review or a comment before the merge timestamp. "No review record" does not mean "unreviewed": a review inside the agent's own interface leaves no record on GitHub. The tool counts whether an auditable record exists.</p>
+<footer>agent-pr-ledger — a ledger of agent-authored pull requests. It counts; it does not score. <a href="https://github.com/atelierfactory/agent-pr-ledger">Repository</a> · <a href="https://atelierfactory.github.io/agent-pr-ledger/llms.txt">llms.txt</a></footer>
+</main></body></html>

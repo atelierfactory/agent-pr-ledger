@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Merge rate measures who presses the button, not agent quality — agent-pr-ledger</title>
+<meta name="description" content="Median time to merge is 50 seconds for OpenAI Codex and 17.7 hours for GitHub Copilot. The difference is posting identity, not quality.">
+<link rel="canonical" href="https://atelierfactory.github.io/agent-pr-ledger/findings/merge-rate-measures-conventions/"><meta name="robots" content="index, follow, max-snippet:-1">
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "Article", "headline": "Merge rate measures who presses the button, not agent quality", "description": "Median time to merge is 50 seconds for OpenAI Codex and 17.7 hours for GitHub Copilot. The difference is posting identity, not quality.", "url": "https://atelierfactory.github.io/agent-pr-ledger/findings/merge-rate-measures-conventions/", "datePublished": "2026-09-08", "dateModified": "2026-09-08", "author": {"@type": "Organization", "name": "aTELiER FACTORY", "url": "https://atelierfactory.jp"}, "publisher": {"@type": "Organization", "name": "aTELiER FACTORY"}, "isPartOf": {"@type": "WebSite", "name": "agent-pr-ledger", "url": "https://atelierfactory.github.io/agent-pr-ledger/"}, "about": {"@type": "SoftwareSourceCode", "name": "agent-pr-ledger", "codeRepository": "https://github.com/atelierfactory/agent-pr-ledger"}, "keywords": ["coding agents", "pull requests", "code review", "agent-pr-ledger", "definition v1.0"]}</script>
+<style>body{margin:0;background:#fff;color:#1a1a1a;font:16px/1.6 -apple-system,Segoe UI,Helvetica,Arial,sans-serif}
+main{max-width:46rem;margin:0 auto;padding:2.5rem 1.25rem}nav{font-size:.9rem;color:#666}
+h1{font-size:1.6rem;margin:.5rem 0 .25rem}h2{font-size:1.15rem;margin:1.75rem 0 .5rem}
+p.lead{font-size:1.05rem}table{border-collapse:collapse;width:100%;margin:.5rem 0}
+td,th{border-bottom:1px solid #ddd;padding:.35rem .5rem;text-align:left;vertical-align:top}
+a{color:#0b57d0}footer{margin-top:2.5rem;color:#666;font-size:.9rem}aside{border-left:3px solid #ccc;padding:.25rem .75rem;color:#444;margin:1rem 0}
+@media (prefers-color-scheme:dark){body{background:#111;color:#e8e8e8}td,th{border-color:#333}a{color:#8ab4f8}footer,nav{color:#999}aside{color:#bbb;border-color:#444}}</style></head>
+<body><main>
+<nav><a href="../../">agent-pr-ledger</a> · <a href="../">findings</a></nav>
+<h1>Merge rate measures who presses the button, not agent quality</h1>
+<p><em>Median time to merge is 50 seconds for OpenAI Codex and 17.7 hours for GitHub Copilot. The difference is posting identity, not quality.</em></p>
+
+<p class="lead">The metric most often used to compare coding agents, the share of their pull requests that get merged, is dominated by a convention: whether the agent posts under the developer's own account or under a bot account.</p>
+<table><tr><th>Agent</th><th>Median time to merge</th><th>Share reaching a human review</th><th>Posts as</th></tr>
+<tr><td>OpenAI Codex</td><td>50 seconds</td><td>5.4%</td><td>developer's own account</td></tr>
+<tr><td>Cursor</td><td>0.6 h</td><td>25.5%</td><td>developer's own account</td></tr>
+<tr><td>Claude Code</td><td>1.5 h</td><td>24.6%</td><td>developer's own account</td></tr>
+<tr><td>Devin</td><td>2.3 h</td><td>36.9%</td><td>one bot account</td></tr>
+<tr><td>GitHub Copilot</td><td>17.7 h</td><td>51.2%</td><td>one bot account</td></tr></table>
+<p>A Codex PR is the developer's own work: reviewed, if at all, inside Codex, then merged by the same person within a minute. A Copilot PR is an external contribution, merged by a maintainer after a median of 17.7 hours. The two "merges" are different events. Comparing their rates compares two social positions.</p>
+<p>Agent composition alone explains 41.5% of between-repository variance in merge rate. A metric that agent choice explains that much of cannot be used to compare repositories either.</p>
+
+<aside>Data: AIDev (Hugging Face <code>hao-li/AIDev</code>), curated subset of 33,596 agent-authored pull requests, 2024-12 to 2025-07, five agents. Figures are as computed on that snapshot; the dataset has since grown. Full write-up: forthcoming.</aside>
+<footer>agent-pr-ledger — a ledger of agent-authored pull requests. It counts; it does not score. <a href="https://github.com/atelierfactory/agent-pr-ledger">Repository</a> · <a href="https://atelierfactory.github.io/agent-pr-ledger/llms.txt">llms.txt</a> · <a href="https://github.com/atelierfactory/agent-pr-ledger/blob/main/CITATION.cff">Cite</a></footer>
+</main></body></html>

@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Repository &#x27;AI-readiness&#x27; scores mostly restate size, language and agent choice — agent-pr-ledger</title>
+<meta name="description" content="24 structural features, harvested by rewinding each repository to the day before its first agent PR, add +0.005 to +0.024 AUC over what agent, task, size and language already give.">
+<link rel="canonical" href="https://atelierfactory.github.io/agent-pr-ledger/findings/readiness-scores-null-result/"><meta name="robots" content="index, follow, max-snippet:-1">
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "Article", "headline": "Repository 'AI-readiness' scores mostly restate size, language and agent choice", "description": "24 structural features, harvested by rewinding each repository to the day before its first agent PR, add +0.005 to +0.024 AUC over what agent, task, size and language already give.", "url": "https://atelierfactory.github.io/agent-pr-ledger/findings/readiness-scores-null-result/", "datePublished": "2026-09-08", "dateModified": "2026-09-08", "author": {"@type": "Organization", "name": "aTELiER FACTORY", "url": "https://atelierfactory.jp"}, "publisher": {"@type": "Organization", "name": "aTELiER FACTORY"}, "isPartOf": {"@type": "WebSite", "name": "agent-pr-ledger", "url": "https://atelierfactory.github.io/agent-pr-ledger/"}, "about": {"@type": "SoftwareSourceCode", "name": "agent-pr-ledger", "codeRepository": "https://github.com/atelierfactory/agent-pr-ledger"}, "keywords": ["coding agents", "pull requests", "code review", "agent-pr-ledger", "definition v1.0"]}</script>
+<style>body{margin:0;background:#fff;color:#1a1a1a;font:16px/1.6 -apple-system,Segoe UI,Helvetica,Arial,sans-serif}
+main{max-width:46rem;margin:0 auto;padding:2.5rem 1.25rem}nav{font-size:.9rem;color:#666}
+h1{font-size:1.6rem;margin:.5rem 0 .25rem}h2{font-size:1.15rem;margin:1.75rem 0 .5rem}
+p.lead{font-size:1.05rem}table{border-collapse:collapse;width:100%;margin:.5rem 0}
+td,th{border-bottom:1px solid #ddd;padding:.35rem .5rem;text-align:left;vertical-align:top}
+a{color:#0b57d0}footer{margin-top:2.5rem;color:#666;font-size:.9rem}aside{border-left:3px solid #ccc;padding:.25rem .75rem;color:#444;margin:1rem 0}
+@media (prefers-color-scheme:dark){body{background:#111;color:#e8e8e8}td,th{border-color:#333}a{color:#8ab4f8}footer,nav{color:#999}aside{color:#bbb;border-color:#444}}</style></head>
+<body><main>
+<nav><a href="../../">agent-pr-ledger</a> · <a href="../">findings</a></nav>
+<h1>Repository &#x27;AI-readiness&#x27; scores mostly restate size, language and agent choice</h1>
+<p><em>24 structural features, harvested by rewinding each repository to the day before its first agent PR, add +0.005 to +0.024 AUC over what agent, task, size and language already give.</em></p>
+
+<p class="lead">At least eight free tools and several commercial products score repositories on structure (instruction files, README, CI, tests). None publishes a validation against agent outcomes. We ran one.</p>
+<p><strong>Method.</strong> For each of 404 repositories, rewind to the commit on the day before its first agent PR (<code>git clone --filter=tree:0 --no-checkout</code>, then checkout by date) and harvest 24 features. Using the current state would count files added <em>after</em> the PRs as causes. Outcome: change-request rate on human-touched PRs, the least agent-contaminated candidate (split-half reliability 0.798; binomial noise only 15% of variance, so the outcome is not the problem).</p>
+<table><tr><th>Controls</th><th>Controls only (AUC)</th><th>+ repository features</th><th>Increment</th><th>Placebo</th><th>Real − placebo</th><th>p</th></tr>
+<tr><td>Agent</td><td>0.638</td><td>0.651</td><td>+0.012</td><td>0.601</td><td>+0.050</td><td>0.005</td></tr>
+<tr><td>+ size, language</td><td>0.628</td><td>0.639</td><td>+0.010</td><td>0.590</td><td>+0.048</td><td>0.004</td></tr>
+<tr><td>+ task type</td><td>0.639</td><td>0.644</td><td>+0.005</td><td>0.597</td><td>+0.047</td><td>0.003</td></tr></table>
+<p>Leave-repository-out cross-validation, eight fold seeds, placebo by permuting whole feature vectors across repositories. Two readings, both correct: repository features carry real information (+0.05 over placebo, stable), and the increment over free information is +0.005 to +0.024 depending on specification. A PR-level model with 24 features is jointly significant, but one feature survives false-discovery control, and it rests on a handful of repositories.</p>
+<p>A score built from these features is mostly a restatement of size, language and agent choice. That is why agent-pr-ledger does not score.</p>
+
+<aside>Data: AIDev (Hugging Face <code>hao-li/AIDev</code>), curated subset of 33,596 agent-authored pull requests, 2024-12 to 2025-07, five agents. Figures are as computed on that snapshot; the dataset has since grown. Full write-up: forthcoming.</aside>
+<footer>agent-pr-ledger — a ledger of agent-authored pull requests. It counts; it does not score. <a href="https://github.com/atelierfactory/agent-pr-ledger">Repository</a> · <a href="https://atelierfactory.github.io/agent-pr-ledger/llms.txt">llms.txt</a> · <a href="https://github.com/atelierfactory/agent-pr-ledger/blob/main/CITATION.cff">Cite</a></footer>
+</main></body></html>

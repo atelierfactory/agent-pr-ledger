@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>A threshold-free self-merge definition still breaks — agent-pr-ledger</title>
+<meta name="description" content="&#x27;Merger ≠ author&#x27; gives self-merge rates of 0.98 for Codex and 0.00 for Copilot, because one posts as the user and the other as a bot.">
+<link rel="canonical" href="https://atelierfactory.github.io/agent-pr-ledger/findings/threshold-free-self-merge-still-breaks/"><meta name="robots" content="index, follow, max-snippet:-1">
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "Article", "headline": "A threshold-free self-merge definition still breaks", "description": "'Merger ≠ author' gives self-merge rates of 0.98 for Codex and 0.00 for Copilot, because one posts as the user and the other as a bot.", "url": "https://atelierfactory.github.io/agent-pr-ledger/findings/threshold-free-self-merge-still-breaks/", "datePublished": "2026-09-08", "dateModified": "2026-09-08", "author": {"@type": "Organization", "name": "aTELiER FACTORY", "url": "https://atelierfactory.jp"}, "publisher": {"@type": "Organization", "name": "aTELiER FACTORY"}, "isPartOf": {"@type": "WebSite", "name": "agent-pr-ledger", "url": "https://atelierfactory.github.io/agent-pr-ledger/"}, "about": {"@type": "SoftwareSourceCode", "name": "agent-pr-ledger", "codeRepository": "https://github.com/atelierfactory/agent-pr-ledger"}, "keywords": ["coding agents", "pull requests", "code review", "agent-pr-ledger", "definition v1.0"]}</script>
+<style>body{margin:0;background:#fff;color:#1a1a1a;font:16px/1.6 -apple-system,Segoe UI,Helvetica,Arial,sans-serif}
+main{max-width:46rem;margin:0 auto;padding:2.5rem 1.25rem}nav{font-size:.9rem;color:#666}
+h1{font-size:1.6rem;margin:.5rem 0 .25rem}h2{font-size:1.15rem;margin:1.75rem 0 .5rem}
+p.lead{font-size:1.05rem}table{border-collapse:collapse;width:100%;margin:.5rem 0}
+td,th{border-bottom:1px solid #ddd;padding:.35rem .5rem;text-align:left;vertical-align:top}
+a{color:#0b57d0}footer{margin-top:2.5rem;color:#666;font-size:.9rem}aside{border-left:3px solid #ccc;padding:.25rem .75rem;color:#444;margin:1rem 0}
+@media (prefers-color-scheme:dark){body{background:#111;color:#e8e8e8}td,th{border-color:#333}a{color:#8ab4f8}footer,nav{color:#999}aside{color:#bbb;border-color:#444}}</style></head>
+<body><main>
+<nav><a href="../../">agent-pr-ledger</a> · <a href="../">findings</a></nav>
+<h1>A threshold-free self-merge definition still breaks</h1>
+<p><em>&#x27;Merger ≠ author&#x27; gives self-merge rates of 0.98 for Codex and 0.00 for Copilot, because one posts as the user and the other as a bot.</em></p>
+
+<p class="lead">"The merger is not the author" needs no threshold and looks structurally clean. It measures posting identity.</p>
+<table><tr><th>Agent</th><th>Self-merge rate (merger = author)</th><th>Unique author accounts</th></tr>
+<tr><td>OpenAI Codex</td><td>0.980</td><td>826</td></tr>
+<tr><td>Cursor</td><td>0.912</td><td>233</td></tr>
+<tr><td>Claude Code</td><td>0.837</td><td>122</td></tr>
+<tr><td>Devin</td><td>0.001</td><td>1</td></tr>
+<tr><td>GitHub Copilot</td><td>0.000</td><td>1</td></tr></table>
+<p>Copilot and Devin each post from a single bot account, so the merger is always someone else. Codex, Cursor and Claude Code post from the developer's account, so the merger is almost always the author. Nothing about review has been measured.</p>
+<p>The absence of a threshold does not imply the absence of contamination. This is why agent-pr-ledger's definition asks a different question: not <em>who merged</em>, but whether <em>anyone other than the author left a record before the merge</em>.</p>
+<p><strong>Definition v1.0 (agent-pr-ledger).</strong> A merged pull request carries a <em>review record</em> if someone other than the PR author, and not a bot, left a review or a comment before the merge timestamp. "No review record" does not mean "unreviewed": a review inside the agent's own interface leaves no record on GitHub. The tool counts whether an auditable record exists.</p>
+<aside>Data: AIDev (Hugging Face <code>hao-li/AIDev</code>), curated subset of 33,596 agent-authored pull requests, 2024-12 to 2025-07, five agents. Figures are as computed on that snapshot; the dataset has since grown. Full write-up: forthcoming.</aside>
+<footer>agent-pr-ledger — a ledger of agent-authored pull requests. It counts; it does not score. <a href="https://github.com/atelierfactory/agent-pr-ledger">Repository</a> · <a href="https://atelierfactory.github.io/agent-pr-ledger/llms.txt">llms.txt</a> · <a href="https://github.com/atelierfactory/agent-pr-ledger/blob/main/CITATION.cff">Cite</a></footer>
+</main></body></html>

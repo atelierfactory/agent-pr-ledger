@@ -163,7 +163,7 @@ FINDINGS = [
 <tr><td>Claude Code</td><td>57</td><td>57</td><td>57</td><td>branch / body</td></tr></table>
 <p>One PR per repository per agent, so no single account dominates. Before the fix, Jules scored 0 of 59: its bot account was missing from the name table. The fix is one line; the lesson is that a rule marked "certain" must be exercised against every agent it claims to cover.</p>
 <p><strong>False positives.</strong> Of 157 PRs from the same repositories, inside AIDev's window, that AIDev does not label, 9 were flagged as agent-authored: an upper bound of 5.7%. Eight of the nine carry <code>codex/</code> branch names and are more plausibly agent PRs the dataset missed than human coincidences; one is a human PR with a Claude co-author trailer (0.6%). AIDev labels presence, not absence, so the figure is an upper bound.</p>
-<p>Script: <a href="""" + REPO + """/blob/main/tools/validate_detection.py">tools/validate_detection.py</a>.</p>
+<p>Script: <a href="REPO_URL/blob/main/tools/validate_detection.py">tools/validate_detection.py</a>.</p>
 """,
     },
 ]
@@ -196,7 +196,7 @@ def page(f: dict) -> str:
 <nav><a href="../../">agent-pr-ledger</a> · <a href="../">findings</a></nav>
 <h1>{html.escape(f['title'])}</h1>
 <p><em>{html.escape(f['summary'])}</em></p>
-{f['body']}
+{f['body'].replace("REPO_URL", REPO)}
 {SCOPE}
 <footer>agent-pr-ledger — a ledger of agent-authored pull requests. It counts; it does not score. <a href="{REPO}">Repository</a> · <a href="{SITE}/llms.txt">llms.txt</a> · <a href="{REPO}/blob/main/CITATION.cff">Cite</a></footer>
 </main></body></html>
