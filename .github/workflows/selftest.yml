@@ -1,0 +1,31 @@
+name: Action self-test
+
+# Runs this repository's own action.yml (uses: ./) so that a change to the action
+# is checked on GitHub, not only locally. Manual only. Nothing is sent.
+
+on:
+  workflow_dispatch:
+    inputs:
+      repo:
+        description: "OWNER/REPO to scan"
+        required: false
+        default: "microsoft/vscode"
+      pr:
+        description: "PR number for watch mode (leave empty for ledger mode)"
+        required: false
+        default: ""
+
+permissions:
+  contents: read
+  pull-requests: read
+
+jobs:
+  selftest:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - uses: ./
+        with:
+          repo: ${{ github.event.inputs.repo }}
+          limit: "120"
+          pr: ${{ github.event.inputs.pr }}
